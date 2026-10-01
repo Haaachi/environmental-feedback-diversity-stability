@@ -1,0 +1,13 @@
+name: crph-model
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy>=1.24
+  - scipy>=1.11
+  - numba>=0.58
+  - h5py>=3.9
+  - joblib>=1.3
+  - pyyaml>=6.0
+  - matplotlib>=3.7
+  - pip

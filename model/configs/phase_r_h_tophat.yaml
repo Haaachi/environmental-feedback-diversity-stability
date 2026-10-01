@@ -1,0 +1,12 @@
+# r-h phase diagram with a top-hat pH response.
+#
+# Only Phi(p) changes relative to configs/phase_r_h.yaml:
+#   triangular default: max(1 - |p - p_opt| / p_tol, 0)
+#   top_hat here      : 1 if |p - p_opt| <= p_tol, else 0
+
+extends: phase_r_h.yaml
+
+ph_response: top_hat
+
+output:
+  run_dir: data/runs/rh_gm8p10_tophat_S12_g100_e1000

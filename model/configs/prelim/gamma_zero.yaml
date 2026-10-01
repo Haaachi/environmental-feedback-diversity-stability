@@ -1,0 +1,31 @@
+# Preliminary: gamma = 0 everywhere (no pH feedback from resources).
+# Null control: without metabolic pH shaping, fluctuations should vanish.
+# Coarse grid for quick comparison.
+
+extends: ../base.yaml
+
+resources:
+  gamma_mode: linear_gradient
+  gamma_min: 0.0
+  gamma_max: 0.0
+  R0: 1.0
+
+scan:
+  name: phase_r_h
+  x_axis: r_mean
+  y_axis: h_stress
+  r_min: 0.0
+  r_max: 1.0
+  h_min: 0.0
+  h_max: 0.2
+  n_grid: 50
+
+fixed:
+  f: 0.03333333333333333
+
+simulation:
+  seed_base: 820000000
+  n_ensemble: 500
+
+output:
+  run_dir: data/runs/prelim/gamma_zero

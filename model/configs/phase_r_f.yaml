@@ -1,0 +1,20 @@
+# Phase diagram: mean growth rate (r) x dilution fraction (f).
+# Orthogonal validation of the (growth, death) phase diagram.
+
+extends: base.yaml
+
+scan:
+  name: phase_r_f
+  x_axis: r_mean
+  y_axis: f
+  r_min: 0.0
+  r_max: 1.0
+  log10_f_min: -5.0
+  log10_f_max: -1.0
+  n_grid: 100
+
+fixed:
+  h_stress: 0.1
+
+output:
+  run_dir: data/runs/v2_main/phase_r_f

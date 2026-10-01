@@ -1,0 +1,41 @@
+# Base model configuration for CR-pH feedback phase diagrams.
+#
+# Current parameter choices (2026-05-27):
+#   - gamma: linear gradient [-8, +10]
+#   - R0: uniform 1.0
+#   - growth_cv: 0.3 (necessary for complexity-driven oscillations)
+#   - No pH buffer (delta=0, no buffer zone)
+
+model:
+  S: 12
+  M: 24
+  tau: 24.0
+  Km: 0.3
+  p_env: 7.0
+  p_tol: 2.0
+  delta: 0.0
+  D: 1.0e-6
+
+resources:
+  gamma_mode: linear_gradient
+  gamma_min: -8.0
+  gamma_max: 10.0
+  R0: 1.0
+
+traits:
+  preference_model: sparse_random_links
+  resource_degree: 6
+  p_opt_distribution: uniform
+  p_opt_min: 5.5
+  p_opt_max: 8.5
+  growth_cv: 0.3
+
+simulation:
+  n_cycles: 30
+  n_saved_days: 10
+  n_ensemble: 1000
+  seed_base: 0
+  suicide_thresh: 1.0e-7
+  rtol: 1.0e-6
+  atol: 1.0e-9
+  max_step_frac: 0.02

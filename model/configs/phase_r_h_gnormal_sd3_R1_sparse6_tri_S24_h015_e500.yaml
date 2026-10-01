@@ -1,0 +1,30 @@
+# Sparse-resource CR-pH phase diagram, S=24.
+#
+# Parameters:
+#   - R0_j = 1.0 for all resources
+#   - gamma_j ~ Normal(0, 3^2), drawn once per community and then quenched
+#   - each species consumes 6 randomly selected resources
+#   - triangular Phi(p)
+#   - scan r_mean in [0, 1] and h_stress in [0, 0.15]
+#   - 500 communities per panel
+
+extends: phase_r_h_gnormal_sd3_R1_sparse6_tri.yaml
+
+model:
+  S: 24
+
+scan:
+  name: phase_r_h
+  x_axis: r_mean
+  y_axis: h_stress
+  r_min: 0.0
+  r_max: 1.0
+  h_min: 0.0
+  h_max: 0.15
+  n_grid: 100
+
+simulation:
+  n_ensemble: 500
+
+output:
+  run_dir: data/runs/rh_gnormal_sd3_R1_sparse6_tri_S24_h015_g100_e500

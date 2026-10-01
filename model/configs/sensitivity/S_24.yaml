@@ -1,0 +1,27 @@
+# Sensitivity: 24 species (doubled diversity).
+# Tests how species pool size shifts phase boundaries.
+
+extends: ../base.yaml
+
+model:
+  S: 24
+
+scan:
+  name: phase_r_h
+  x_axis: r_mean
+  y_axis: h_stress
+  r_min: 0.0
+  r_max: 1.0
+  h_min: 0.0
+  h_max: 0.2
+  n_grid: 50
+
+fixed:
+  f: 0.03333333333333333
+
+simulation:
+  seed_base: 300000000
+  n_ensemble: 500
+
+output:
+  run_dir: data/runs/sensitivity/S_24

@@ -1,0 +1,20 @@
+# Sensitivity: symmetric gamma (-10 / +10).
+# Tests whether asymmetric gamma is essential for the two-regime picture.
+
+extends: ../base.yaml
+
+resources:
+  R0: 1.0
+  groups:
+    - name: acidifying
+      count: 8
+      gamma: -10.0
+    - name: neutral
+      count: 4
+      gamma: 0.0
+    - name: alkalinizing
+      count: 12
+      gamma: 10.0
+
+simulation:
+  seed_base: 500000000

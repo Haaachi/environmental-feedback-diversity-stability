@@ -1,0 +1,22 @@
+# Small end-to-end test configuration.
+
+extends: phase_r_h_gnormal_sd3_R1_sparse6_tri.yaml
+
+scan:
+  name: phase_r_h
+  x_axis: r_mean
+  y_axis: h_stress
+  r_min: 0.0
+  r_max: 1.0
+  h_min: 0.0
+  h_max: 0.2
+  n_grid: 2
+
+simulation:
+  n_cycles: 4
+  n_saved_days: 3
+  n_ensemble: 2
+  seed_base: 990000000
+
+output:
+  run_dir: data/runs/smoke_test

@@ -1,0 +1,8 @@
+extends: base.yaml
+
+resources:
+  gamma_mode: normal
+  gamma_mean: 0.0
+  gamma_sd: 5.0
+  gamma_seed: 0
+  R0: 1.0

@@ -1,0 +1,12 @@
+# r-h phase diagram with triangular Phi(p), gamma range [-8, +10].
+
+extends: phase_r_h.yaml
+
+resources:
+  gamma_mode: linear_gradient
+  gamma_min: -8.0
+  gamma_max: 10.0
+  R0: 1.0
+
+output:
+  run_dir: data/runs/rh_gm8p10_tri_S12_g100_e1000

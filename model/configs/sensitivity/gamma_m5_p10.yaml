@@ -1,0 +1,30 @@
+# Sensitivity: asymmetric gamma gradient [-5, +10].
+# Tests robustness of phase diagram to gamma asymmetry.
+
+extends: ../base.yaml
+
+resources:
+  gamma_mode: linear_gradient
+  gamma_min: -5.0
+  gamma_max: 10.0
+  R0: 1.0
+
+scan:
+  name: phase_r_h
+  x_axis: r_mean
+  y_axis: h_stress
+  r_min: 0.0
+  r_max: 1.0
+  h_min: 0.0
+  h_max: 0.2
+  n_grid: 50
+
+fixed:
+  f: 0.03333333333333333
+
+simulation:
+  seed_base: 600000000
+  n_ensemble: 500
+
+output:
+  run_dir: data/runs/sensitivity/gamma_m5_p10

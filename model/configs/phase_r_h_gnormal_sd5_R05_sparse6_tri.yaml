@@ -1,0 +1,48 @@
+# Alternative/sensitivity r-h phase diagram for the sparse-resource CR-pH model.
+#
+# Not the manuscript main result. This variant changes both resource supply and
+# gamma-disorder width relative to the sd3/R1 main run:
+#   - R0_j = 0.5 for all resources
+#   - gamma_j ~ Normal(0, 5^2), drawn once per community and then quenched
+#   - each species consumes 6 randomly selected resources
+#   - triangular Phi(p)
+#   - scan r_mean in [0, 1] and h_stress in [0, 0.2]
+
+extends: phase_r_h.yaml
+
+ph_response: triangular
+
+resources:
+  gamma_mode: normal_per_community
+  gamma_mean: 0.0
+  gamma_sd: 5.0
+  gamma_seed_offset: 730000000
+  R0: 0.5
+
+traits:
+  preference_model: sparse_random_links
+  resource_degree: 6
+  growth_cv: 0.3
+
+scan:
+  name: phase_r_h
+  x_axis: r_mean
+  y_axis: h_stress
+  r_min: 0.0
+  r_max: 1.0
+  h_min: 0.0
+  h_max: 0.2
+  n_grid: 100
+
+fixed:
+  f: 0.03333333333333333
+
+simulation:
+  n_cycles: 30
+  n_saved_days: 10
+  n_ensemble: 1000
+  seed_base: 0
+  suicide_thresh: 1.0e-7
+
+output:
+  run_dir: data/runs/rh_gnormal_sd5_R05_sparse6_tri_S12_g100_e1000

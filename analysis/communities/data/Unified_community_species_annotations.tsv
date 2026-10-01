@@ -1,0 +1,276 @@
+Experiment	Community	Rank	Species	Unified_annotation	Display_Taxon	Genus	Species_name	Feature_ID	Representative_ASV	Max_relabund_in_community	Num_samples_above_threshold	Presence_rule
+mortality	1	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.869041	5	stable
+mortality	1	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.014383	5	stable
+mortality	1	3	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.050256	21	stable
+mortality	1	4	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.347688	3	stable
+mortality	1	5	species5	Bacillus sp.1	Bacillus sp.1	Bacillus		094226930fb6d71f02c7b6124105e94b	ASV_4	0.952146	20	stable
+mortality	1	6	species9	Exiguobacterium sp.1	Exiguobacterium sp.1	Exiguobacterium		e55f7ffdc508fc02e0ce54bfb21e6038	ASV_9	0.809912	17	stable
+mortality	1	7	species10	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium sp.1	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium sp.1	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium		2ce83ce8633190af0e5f51af6c6d7da8	ASV_10	0.789465	8	stable
+mortality	1	8	species14	Curtobacterium sp.1	Curtobacterium sp.1	Curtobacterium		e6e024215a635bef49488eb7fa1b8617	ASV_13	0.49743	9	stable
+mortality	1	9	species15	Bacillus sp.3	Bacillus sp.3	Bacillus		d73835da51464de444e732fe62aec643	ASV_14	0.072545	13	stable
+mortality	1	10	species17	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae		cf5c0e51bd37486974dfdca9d7533b3f	ASV_17	0.060159	5	stable
+mortality	1	11	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.016111	5	stable
+mortality	1	12	species20	Pseudomonas sp.1	Pseudomonas sp.1	Pseudomonas		d8264276a0301fe25e0c7720d5a5a48c	ASV_21	0.521796	6	stable
+mortality	1	13	species33	Curtobacterium sp.2	Curtobacterium sp.2	Curtobacterium		b0fe8eac209ae6ea5ed9efaa7cfcf9b0	ASV_35	0.037684	8	stable
+mortality	2	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.413928	15	stable
+mortality	2	2	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.941085	26	stable
+mortality	2	3	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.398036	4	stable
+mortality	2	4	species5	Bacillus sp.1	Bacillus sp.1	Bacillus		094226930fb6d71f02c7b6124105e94b	ASV_4	0.066301	20	stable
+mortality	2	5	species8	Aeromonas sp.1	Aeromonas sp.1	Aeromonas		6ba560a76661744bc65eed04953c1314	ASV_8	0.097174	10	stable
+mortality	2	6	species9	Exiguobacterium sp.1	Exiguobacterium sp.1	Exiguobacterium		e55f7ffdc508fc02e0ce54bfb21e6038	ASV_9	0.025048	6	stable
+mortality	2	7	species11	Burkholderia-Caballeronia-Paraburkholderia sp.2	Burkholderia-Caballeronia-Paraburkholderia sp.2	Burkholderia-Caballeronia-Paraburkholderia		5ea47811a8275ec5dadade92ce4f0434	ASV_11	0.094929	9	stable
+mortality	2	8	species13	Bacillus sp.2	Bacillus sp.2	Bacillus		0d87b112bc336b97248bf4757a668689	ASV_12	0.430251	14	stable
+mortality	2	9	species15	Bacillus sp.3	Bacillus sp.3	Bacillus		d73835da51464de444e732fe62aec643	ASV_14	0.244691	10	stable
+mortality	2	10	species17	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae		cf5c0e51bd37486974dfdca9d7533b3f	ASV_17	0.530252	19	stable
+mortality	2	11	species23	Aeromonas sp.2	Aeromonas sp.2	Aeromonas		08f24644c7d2d96ca8a64052ea5560d8	ASV_24	0.070787	10	stable
+mortality	2	12	species28	Lysinibacillus sp.2	Lysinibacillus sp.2	Lysinibacillus		94d23d877a80d57247113bae6b5b489d	ASV_30	0.059245	12	stable
+mortality	2	13	species31	Bacillus sp.5	Bacillus sp.5	Bacillus		da1243b70ecbd0e5f42263fa6a28474e	ASV_33	0.039252	9	stable
+mortality	3	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.698071	10	stable
+mortality	3	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.538487	15	stable
+mortality	3	3	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.034207	14	stable
+mortality	3	4	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.14138	3	stable
+mortality	3	5	species5	Bacillus sp.1	Bacillus sp.1	Bacillus		094226930fb6d71f02c7b6124105e94b	ASV_4	0.033464	10	stable
+mortality	3	6	species6	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium		7a21c9fea813dd4d7670e06c68be9aa7	ASV_5	0.838857	30	stable
+mortality	3	7	species8	Aeromonas sp.1	Aeromonas sp.1	Aeromonas		6ba560a76661744bc65eed04953c1314	ASV_8	0.132032	16	stable
+mortality	3	8	species9	Exiguobacterium sp.1	Exiguobacterium sp.1	Exiguobacterium		e55f7ffdc508fc02e0ce54bfb21e6038	ASV_9	0.583874	16	stable
+mortality	3	9	species13	Bacillus sp.2	Bacillus sp.2	Bacillus		0d87b112bc336b97248bf4757a668689	ASV_12	0.724203	19	stable
+mortality	3	10	species16	Pantoea sp.2	Pantoea sp.2	Pantoea		58a17f62f12580aeae1cef22307c50c2	ASV_16	0.043502	5	stable
+mortality	3	11	species17	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae		cf5c0e51bd37486974dfdca9d7533b3f	ASV_17	0.045637	5	stable
+mortality	3	12	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.01372	4	stable
+mortality	3	13	species19	Chryseobacterium sp.2	Chryseobacterium sp.2	Chryseobacterium		bc3a0c5dd8735fe99f278579cc7285ac	ASV_20	0.135102	30	stable
+mortality	3	14	species23	Aeromonas sp.2	Aeromonas sp.2	Aeromonas		08f24644c7d2d96ca8a64052ea5560d8	ASV_24	0.096132	12	stable
+mortality	3	15	species28	Lysinibacillus sp.2	Lysinibacillus sp.2	Lysinibacillus		94d23d877a80d57247113bae6b5b489d	ASV_30	0.058534	7	stable
+mortality	3	16	species31	Bacillus sp.5	Bacillus sp.5	Bacillus		da1243b70ecbd0e5f42263fa6a28474e	ASV_33	0.011012	3	stable
+mortality	4	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.627306	30	stable
+mortality	4	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.521463	26	stable
+mortality	4	3	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.924039	30	stable
+mortality	4	4	species6	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium		7a21c9fea813dd4d7670e06c68be9aa7	ASV_5	0.046387	5	stable
+mortality	4	5	species12	Stenotrophomonas sp.1	Stenotrophomonas sp.1	Stenotrophomonas		891019e319f5d8d088ed4f9379fd63ef	ASV_15	0.411691	14	stable
+mortality	4	6	species16	Pantoea sp.2	Pantoea sp.2	Pantoea		58a17f62f12580aeae1cef22307c50c2	ASV_16	0.066199	15	stable
+mortality	4	7	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.030681	23	stable
+mortality	4	8	species22	Stenotrophomonas sp.2	Stenotrophomonas sp.2	Stenotrophomonas		c56799e3f16cc3f704fdcf7a99b62526	ASV_26	0.051793	11	stable
+mortality	4	9	species37	Paenibacillus sp.1	Paenibacillus sp.1	Paenibacillus		632e3cf2a03ad2a361295605a9e2774d	ASV_43	0.060704	6	stable
+mortality	5	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.721119	30	stable
+mortality	5	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.029858	27	stable
+mortality	5	3	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.178106	30	stable
+mortality	5	4	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.263379	8	stable
+mortality	5	5	species6	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium		7a21c9fea813dd4d7670e06c68be9aa7	ASV_5	0.277056	30	stable
+mortality	5	6	species8	Aeromonas sp.1	Aeromonas sp.1	Aeromonas		6ba560a76661744bc65eed04953c1314	ASV_8	0.035686	11	stable
+mortality	5	7	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.026389	28	stable
+mortality	5	8	species22	Stenotrophomonas sp.2	Stenotrophomonas sp.2	Stenotrophomonas		c56799e3f16cc3f704fdcf7a99b62526	ASV_26	0.021012	6	stable
+mortality	5	9	species25	Pandoraea sp.1	Pandoraea sp.1	Pandoraea		c6b8d1285bea42f3020727b4f5736b96	ASV_29	0.111224	19	stable
+mortality	6	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.743302	30	stable
+mortality	6	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.820348	30	stable
+mortality	6	3	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.490602	6	stable
+mortality	6	4	species6	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium		7a21c9fea813dd4d7670e06c68be9aa7	ASV_5	0.019127	8	stable
+mortality	6	5	species7	Burkholderia-Caballeronia-Paraburkholderia sp.1	Burkholderia-Caballeronia-Paraburkholderia sp.1	Burkholderia-Caballeronia-Paraburkholderia		6adb8b6a78ae13e075001f09dd220437	ASV_7	0.406714	13	stable
+mortality	6	6	species12	Stenotrophomonas sp.1	Stenotrophomonas sp.1	Stenotrophomonas		891019e319f5d8d088ed4f9379fd63ef	ASV_15	0.48572	3	stable
+mortality	6	7	species16	Pantoea sp.2	Pantoea sp.2	Pantoea		58a17f62f12580aeae1cef22307c50c2	ASV_16	0.140187	27	stable
+mortality	6	8	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.031978	8	stable
+mortality	6	9	species21	Bacillus sp.4	Bacillus sp.4	Bacillus		75e44d0bbc9811a1be230d6ebc46100e	ASV_22	0.378655	6	stable
+mortality	6	10	species22	Stenotrophomonas sp.2	Stenotrophomonas sp.2	Stenotrophomonas		c56799e3f16cc3f704fdcf7a99b62526	ASV_26	0.055873	6	stable
+mortality	6	11	species26	Acinetobacter sp.1	Acinetobacter sp.1	Acinetobacter		50a3b56e0b7db75ee9daccf7a751ba41	ASV_27	0.189467	5	stable
+mortality	6	12	species27	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia		63d58dbf438c92d67b1fd0a28ce0f360	ASV_28	0.034223	13	stable
+mortality	6	13	species30	Unclassified_Planococcaceae sp.1	Unclassified_Planococcaceae sp.1	Unclassified_Planococcaceae		b51ac1e5196f4228a0793c0636a4358f	ASV_32	0.010721	3	stable
+mortality	6	14	species36	Microbacterium sp.2	Microbacterium sp.2	Microbacterium		ead596aa7c6847271fdaa9d0dc36d02b	ASV_41	0.058149	4	stable
+mortality	7	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.869182	6	stable
+mortality	7	2	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.015477	9	stable
+mortality	7	3	species7	Burkholderia-Caballeronia-Paraburkholderia sp.1	Burkholderia-Caballeronia-Paraburkholderia sp.1	Burkholderia-Caballeronia-Paraburkholderia		6adb8b6a78ae13e075001f09dd220437	ASV_7	0.912449	28	stable
+mortality	7	4	species8	Aeromonas sp.1	Aeromonas sp.1	Aeromonas		6ba560a76661744bc65eed04953c1314	ASV_8	0.263467	11	stable
+mortality	7	5	species9	Exiguobacterium sp.1	Exiguobacterium sp.1	Exiguobacterium		e55f7ffdc508fc02e0ce54bfb21e6038	ASV_9	0.874567	30	stable
+mortality	7	6	species10	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium sp.1	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium sp.1	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium		2ce83ce8633190af0e5f51af6c6d7da8	ASV_10	0.727726	14	stable
+mortality	7	7	species13	Bacillus sp.2	Bacillus sp.2	Bacillus		0d87b112bc336b97248bf4757a668689	ASV_12	0.308617	9	stable
+mortality	7	8	species14	Curtobacterium sp.1	Curtobacterium sp.1	Curtobacterium		e6e024215a635bef49488eb7fa1b8617	ASV_13	0.494406	22	stable
+mortality	7	9	species23	Aeromonas sp.2	Aeromonas sp.2	Aeromonas		08f24644c7d2d96ca8a64052ea5560d8	ASV_24	0.187291	5	stable
+mortality	7	10	species27	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia		63d58dbf438c92d67b1fd0a28ce0f360	ASV_28	0.028888	5	stable
+mortality	7	11	species32	Unclassified_Enterobacteriaceae sp.4	Unclassified_Enterobacteriaceae sp.4	Unclassified_Enterobacteriaceae		cacc6b9cc93f24ab84b9975cb487e24a	ASV_34	0.016079	3	stable
+mortality	8	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.566442	22	stable
+mortality	8	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.021518	12	stable
+mortality	8	3	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.881085	30	stable
+mortality	8	4	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.671623	23	stable
+mortality	8	5	species5	Bacillus sp.1	Bacillus sp.1	Bacillus		094226930fb6d71f02c7b6124105e94b	ASV_4	0.046229	5	stable
+mortality	8	6	species8	Aeromonas sp.1	Aeromonas sp.1	Aeromonas		6ba560a76661744bc65eed04953c1314	ASV_8	0.036308	10	stable
+mortality	8	7	species13	Bacillus sp.2	Bacillus sp.2	Bacillus		0d87b112bc336b97248bf4757a668689	ASV_12	0.030632	4	stable
+mortality	8	8	species15	Bacillus sp.3	Bacillus sp.3	Bacillus		d73835da51464de444e732fe62aec643	ASV_14	0.286364	11	stable
+mortality	8	9	species17	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae sp.2	Unclassified_Enterobacteriaceae		cf5c0e51bd37486974dfdca9d7533b3f	ASV_17	0.019457	4	stable
+mortality	8	10	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.028552	12	stable
+mortality	8	11	species23	Aeromonas sp.2	Aeromonas sp.2	Aeromonas		08f24644c7d2d96ca8a64052ea5560d8	ASV_24	0.025288	3	stable
+mortality	8	12	species27	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia		63d58dbf438c92d67b1fd0a28ce0f360	ASV_28	0.019223	13	stable
+mortality	9	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.895988	9	stable
+mortality	9	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.015273	3	stable
+mortality	9	3	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.0423	10	stable
+mortality	9	4	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.953994	1	high_abundance_single_or_pair
+mortality	9	5	species5	Bacillus sp.1	Bacillus sp.1	Bacillus		094226930fb6d71f02c7b6124105e94b	ASV_4	0.980805	14	stable
+mortality	9	6	species8	Aeromonas sp.1	Aeromonas sp.1	Aeromonas		6ba560a76661744bc65eed04953c1314	ASV_8	0.916603	23	stable
+mortality	9	7	species10	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium sp.1	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium sp.1	Allorhizobium-Neorhizobium-Pararhizobium-Rhizobium		2ce83ce8633190af0e5f51af6c6d7da8	ASV_10	0.338662	3	stable
+mortality	9	8	species13	Bacillus sp.2	Bacillus sp.2	Bacillus		0d87b112bc336b97248bf4757a668689	ASV_12	0.03293	4	stable
+mortality	9	9	species15	Bacillus sp.3	Bacillus sp.3	Bacillus		d73835da51464de444e732fe62aec643	ASV_14	0.363694	16	stable
+mortality	9	10	species20	Pseudomonas sp.1	Pseudomonas sp.1	Pseudomonas		d8264276a0301fe25e0c7720d5a5a48c	ASV_21	0.154475	5	stable
+mortality	9	11	species24	Microbacterium sp.1	Microbacterium sp.1	Microbacterium		6676c8881002eb829fcadf5f9928888f	ASV_25	0.531265	10	stable
+mortality	9	12	species27	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia		63d58dbf438c92d67b1fd0a28ce0f360	ASV_28	0.027776	5	stable
+mortality	9	13	species34	Unclassified_Comamonadaceae sp.1	Unclassified_Comamonadaceae sp.1	Unclassified_Comamonadaceae		7bae376e41b6259952179d259f069c1e	ASV_36	0.094027	3	stable
+mortality	9	14	species38	Paenibacillus sp.2	Paenibacillus sp.2	Paenibacillus		ff4b74ec14ac8f9e2aca6f3b5d9cdee0	ASV_44	0.206168	2	high_abundance_single_or_pair
+mortality	10	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.826282	23	stable
+mortality	10	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.8519	29	stable
+mortality	10	3	species5	Bacillus sp.1	Bacillus sp.1	Bacillus		094226930fb6d71f02c7b6124105e94b	ASV_4	0.015894	3	stable
+mortality	10	4	species6	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium		7a21c9fea813dd4d7670e06c68be9aa7	ASV_5	0.012846	4	stable
+mortality	10	5	species11	Burkholderia-Caballeronia-Paraburkholderia sp.2	Burkholderia-Caballeronia-Paraburkholderia sp.2	Burkholderia-Caballeronia-Paraburkholderia		5ea47811a8275ec5dadade92ce4f0434	ASV_11	0.937193	23	stable
+mortality	10	6	species16	Pantoea sp.2	Pantoea sp.2	Pantoea		58a17f62f12580aeae1cef22307c50c2	ASV_16	0.146948	20	stable
+mortality	10	7	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.060133	5	stable
+mortality	10	8	species21	Bacillus sp.4	Bacillus sp.4	Bacillus		75e44d0bbc9811a1be230d6ebc46100e	ASV_22	0.336482	11	stable
+mortality	10	9	species22	Stenotrophomonas sp.2	Stenotrophomonas sp.2	Stenotrophomonas		c56799e3f16cc3f704fdcf7a99b62526	ASV_26	0.015645	5	stable
+mortality	10	10	species24	Microbacterium sp.1	Microbacterium sp.1	Microbacterium		6676c8881002eb829fcadf5f9928888f	ASV_25	0.043306	3	stable
+mortality	10	11	species29	Burkholderia-Caballeronia-Paraburkholderia sp.4	Burkholderia-Caballeronia-Paraburkholderia sp.4	Burkholderia-Caballeronia-Paraburkholderia		67d24dd997eaf59f2e98fa5e95c42f1e	ASV_31	0.031102	11	stable
+mortality	10	12	species32	Unclassified_Enterobacteriaceae sp.4	Unclassified_Enterobacteriaceae sp.4	Unclassified_Enterobacteriaceae		cacc6b9cc93f24ab84b9975cb487e24a	ASV_34	0.016222	6	stable
+mortality	10	13	species35	Bacillus sp.6	Bacillus sp.6	Bacillus		57420fd8440e7609b3382ea0f75e0dc8	ASV_40	0.280531	1	high_abundance_single_or_pair
+mortality	10	14	species36	Microbacterium sp.2	Microbacterium sp.2	Microbacterium		ead596aa7c6847271fdaa9d0dc36d02b	ASV_41	0.048031	5	stable
+mortality	11	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.611654	30	stable
+mortality	11	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.046886	30	stable
+mortality	11	3	species3	Lysinibacillus sp.1	Lysinibacillus sp.1	Lysinibacillus		49a361dc4554ca6f03bc8d8bf47e329c	ASV_3	0.199409	30	stable
+mortality	11	4	species5	Bacillus sp.1	Bacillus sp.1	Bacillus		094226930fb6d71f02c7b6124105e94b	ASV_4	0.012733	3	stable
+mortality	11	5	species6	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium		7a21c9fea813dd4d7670e06c68be9aa7	ASV_5	0.546963	30	stable
+mortality	11	6	species13	Bacillus sp.2	Bacillus sp.2	Bacillus		0d87b112bc336b97248bf4757a668689	ASV_12	0.106235	4	stable
+mortality	11	7	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.052462	30	stable
+mortality	11	8	species19	Chryseobacterium sp.2	Chryseobacterium sp.2	Chryseobacterium		bc3a0c5dd8735fe99f278579cc7285ac	ASV_20	0.094757	30	stable
+mortality	11	9	species25	Pandoraea sp.1	Pandoraea sp.1	Pandoraea		c6b8d1285bea42f3020727b4f5736b96	ASV_29	0.065555	15	stable
+mortality	11	10	species29	Burkholderia-Caballeronia-Paraburkholderia sp.4	Burkholderia-Caballeronia-Paraburkholderia sp.4	Burkholderia-Caballeronia-Paraburkholderia		67d24dd997eaf59f2e98fa5e95c42f1e	ASV_31	0.018552	9	stable
+mortality	12	1	species1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae sp.1	Unclassified_Enterobacteriaceae		677929eac52be081cdae08a0b9c70eb2	ASV_1	0.672919	30	stable
+mortality	12	2	species2	Pantoea sp.1	Pantoea sp.1	Pantoea		073d0c62d1257a783d7508c138432fc4	ASV_2	0.817279	29	stable
+mortality	12	3	species4	Sphingobacterium sp.1	Sphingobacterium sp.1	Sphingobacterium		3bdf3962a4d6b9738dc1bfa095f6cc8e	ASV_6	0.231292	4	stable
+mortality	12	4	species6	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium		7a21c9fea813dd4d7670e06c68be9aa7	ASV_5	0.017918	6	stable
+mortality	12	5	species7	Burkholderia-Caballeronia-Paraburkholderia sp.1	Burkholderia-Caballeronia-Paraburkholderia sp.1	Burkholderia-Caballeronia-Paraburkholderia		6adb8b6a78ae13e075001f09dd220437	ASV_7	0.851931	11	stable
+mortality	12	6	species8	Aeromonas sp.1	Aeromonas sp.1	Aeromonas		6ba560a76661744bc65eed04953c1314	ASV_8	0.512182	3	stable
+mortality	12	7	species12	Stenotrophomonas sp.1	Stenotrophomonas sp.1	Stenotrophomonas		891019e319f5d8d088ed4f9379fd63ef	ASV_15	0.404989	15	stable
+mortality	12	8	species15	Bacillus sp.3	Bacillus sp.3	Bacillus		d73835da51464de444e732fe62aec643	ASV_14	0.806193	8	stable
+mortality	12	9	species16	Pantoea sp.2	Pantoea sp.2	Pantoea		58a17f62f12580aeae1cef22307c50c2	ASV_16	0.110128	17	stable
+mortality	12	10	species18	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae sp.3	Unclassified_Enterobacteriaceae		e64eb564f1aaccc60803b5b801d08994	ASV_19	0.076291	22	stable
+mortality	12	11	species22	Stenotrophomonas sp.2	Stenotrophomonas sp.2	Stenotrophomonas		c56799e3f16cc3f704fdcf7a99b62526	ASV_26	0.056332	22	stable
+mortality	12	12	species26	Acinetobacter sp.1	Acinetobacter sp.1	Acinetobacter		50a3b56e0b7db75ee9daccf7a751ba41	ASV_27	0.162186	8	stable
+mortality	12	13	species27	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia sp.3	Burkholderia-Caballeronia-Paraburkholderia		63d58dbf438c92d67b1fd0a28ce0f360	ASV_28	0.026561	4	stable
+mortality	12	14	species29	Burkholderia-Caballeronia-Paraburkholderia sp.4	Burkholderia-Caballeronia-Paraburkholderia sp.4	Burkholderia-Caballeronia-Paraburkholderia		67d24dd997eaf59f2e98fa5e95c42f1e	ASV_31	0.018087	12	stable
+mortality	12	15	species34	Unclassified_Comamonadaceae sp.1	Unclassified_Comamonadaceae sp.1	Unclassified_Comamonadaceae		7bae376e41b6259952179d259f069c1e	ASV_36	0.046839	4	stable
+temperature	1	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.933558	49	stable
+temperature	1	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.655824	35	stable
+temperature	1	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.760263	28	stable
+temperature	1	4	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.055052	15	stable
+temperature	1	5	species8	Burkholderia sp.1	Burkholderia sp.1	Burkholderia	Burkholderia puraquae	71243f86c470ff2e90cecacd72cc2208	ASV_8	0.998214	32	stable
+temperature	1	6	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.028365	9	stable
+temperature	1	7	species10	Staphylococcus sp.1	Staphylococcus sp.1	Staphylococcus	Staphylococcus aureus	3a8a7409bdc33da14a01ec3e3313b9a7	ASV_10	0.056034	5	stable
+temperature	1	8	species11	Pseudomonas sp.1	Pseudomonas sp.1	Pseudomonas	Pseudomonas caspiana	727a1bc7bf5ce7252f2e59f7b3ebc105	ASV_11	0.823826	16	stable
+temperature	1	9	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.052981	3	stable
+temperature	1	10	species18	Burkholderia sp.2	Burkholderia sp.2	Burkholderia	Burkholderia paludis	b64cf0e9dea8cef6b9500b364c179b98	ASV_21	0.303179	22	stable
+temperature	2	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.811893	64	stable
+temperature	2	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.050377	25	stable
+temperature	2	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.660816	28	stable
+temperature	2	4	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.501115	51	stable
+temperature	2	5	species8	Burkholderia sp.1	Burkholderia sp.1	Burkholderia	Burkholderia puraquae	71243f86c470ff2e90cecacd72cc2208	ASV_8	0.713697	23	stable
+temperature	2	6	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.234874	47	stable
+temperature	2	7	species10	Staphylococcus sp.1	Staphylococcus sp.1	Staphylococcus	Staphylococcus aureus	3a8a7409bdc33da14a01ec3e3313b9a7	ASV_10	0.223823	15	stable
+temperature	2	8	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.513142	31	stable
+temperature	2	9	species16	Paenibacillus sp.2	Paenibacillus sp.2	Paenibacillus	Paenibacillus wenxiniae	90c6ca530feb88b8942b2ac321fcd56f	ASV_17	0.245179	20	stable
+temperature	2	10	species18	Burkholderia sp.2	Burkholderia sp.2	Burkholderia	Burkholderia paludis	b64cf0e9dea8cef6b9500b364c179b98	ASV_21	0.019224	7	stable
+temperature	2	11	species19	Pantoea sp.2	Pantoea sp.2	Pantoea	Pantoea coffeiphila	ca97920f11565fb3d491f752f91bbb0e	ASV_22	0.028583	7	stable
+temperature	3	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.383598	61	stable
+temperature	3	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.951893	65	stable
+temperature	3	3	species4	Paenibacillus sp.1	Paenibacillus sp.1	Paenibacillus	Paenibacillus cookii	5d2d78489042634629e229ace1e0ce56	ASV_4	0.993289	16	stable
+temperature	3	4	species5	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium	Chryseobacterium timonianum	7e65f9a2a19cb9e711e4328b90cc2c3c	ASV_6	0.777309	54	stable
+temperature	3	5	species6	Bacillus sp.2	Bacillus sp.2	Bacillus	Bacillus velezensis	2990b08e6fdd30ce626c1f5d8d026587	ASV_5	0.984726	20	stable
+temperature	3	6	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.526355	42	stable
+temperature	3	7	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.022573	4	stable
+temperature	3	8	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.048489	18	stable
+temperature	3	9	species14	Staphylococcus sp.2	Staphylococcus sp.2	Staphylococcus	Staphylococcus saprophyticus	8d1dd222f19ae53014133f3d67f5d639	ASV_15	0.391889	22	stable
+temperature	3	10	species22	Pantoea sp.3	Pantoea sp.3	Pantoea	Pantoea dispersa	246c8257fd5ad08382840ca81a417f91	ASV_27	0.030853	13	stable
+temperature	3	11	species23	Pandoraea sp.1	Pandoraea sp.1	Pandoraea	Pandoraea faecigallinarum	2556822550fb3a55f8f74ef58112cf0b	ASV_28	0.054085	4	stable
+temperature	4	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.85978	64	stable
+temperature	4	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.908674	64	stable
+temperature	4	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.029681	8	stable
+temperature	4	4	species5	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium	Chryseobacterium timonianum	7e65f9a2a19cb9e711e4328b90cc2c3c	ASV_6	0.774617	5	stable
+temperature	4	5	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.066995	23	stable
+temperature	4	6	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.022464	12	stable
+temperature	4	7	species10	Staphylococcus sp.1	Staphylococcus sp.1	Staphylococcus	Staphylococcus aureus	3a8a7409bdc33da14a01ec3e3313b9a7	ASV_10	0.624797	40	stable
+temperature	4	8	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.089029	16	stable
+temperature	4	9	species14	Staphylococcus sp.2	Staphylococcus sp.2	Staphylococcus	Staphylococcus saprophyticus	8d1dd222f19ae53014133f3d67f5d639	ASV_15	0.012938	3	stable
+temperature	4	10	species15	Curtobacterium sp.1	Curtobacterium sp.1	Curtobacterium	Curtobacterium gossypii	2555fc13894b5e276d6ac78f0f4523ef	ASV_16	0.140029	16	stable
+temperature	4	11	species17	Microbacterium sp.1	Microbacterium sp.1	Microbacterium	Microbacterium galbum	5441bf2a859d6831612daa777f982d82	ASV_20	0.735792	19	stable
+temperature	4	12	species24	Staphylococcus sp.3	Staphylococcus sp.3	Staphylococcus	Staphylococcus aureus	a8760fa2cfa81b300bfcd9c40e492835	ASV_32	0.027928	4	stable
+temperature	4	13	species25	Staphylococcus sp.4	Staphylococcus sp.4	Staphylococcus	Staphylococcus aureus	0f89ba63b47f3b624c13293cb4d56486	ASV_34	0.022845	4	stable
+temperature	5	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.954654	64	stable
+temperature	5	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.05232	23	stable
+temperature	5	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.457773	36	stable
+temperature	5	4	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.436782	28	stable
+temperature	5	5	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.771529	40	stable
+temperature	5	6	species12	Stenotrophomonas sp.1	Stenotrophomonas sp.1	Stenotrophomonas	Stenotrophomonas pavanii	41f01f3e3cbf6beb908ae1ebb553208e	ASV_12	0.546083	32	stable
+temperature	5	7	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.092143	19	stable
+temperature	5	8	species19	Pantoea sp.2	Pantoea sp.2	Pantoea	Pantoea coffeiphila	ca97920f11565fb3d491f752f91bbb0e	ASV_22	0.028909	12	stable
+temperature	5	9	species21	Bacillus sp.4	Bacillus sp.4	Bacillus	Bacillus bruguierae	b4e6236b954b74e919a851827e00e014	ASV_26	0.036495	21	stable
+temperature	6	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.987667	60	stable
+temperature	6	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.066318	19	stable
+temperature	6	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.700978	21	stable
+temperature	6	4	species5	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium	Chryseobacterium timonianum	7e65f9a2a19cb9e711e4328b90cc2c3c	ASV_6	0.759654	9	stable
+temperature	6	5	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.927342	42	stable
+temperature	6	6	species8	Burkholderia sp.1	Burkholderia sp.1	Burkholderia	Burkholderia puraquae	71243f86c470ff2e90cecacd72cc2208	ASV_8	0.826759	13	stable
+temperature	6	7	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.02915	6	stable
+temperature	6	8	species14	Staphylococcus sp.2	Staphylococcus sp.2	Staphylococcus	Staphylococcus saprophyticus	8d1dd222f19ae53014133f3d67f5d639	ASV_15	0.198171	4	stable
+temperature	6	9	species18	Burkholderia sp.2	Burkholderia sp.2	Burkholderia	Burkholderia paludis	b64cf0e9dea8cef6b9500b364c179b98	ASV_21	0.01454	4	stable
+temperature	6	10	species19	Pantoea sp.2	Pantoea sp.2	Pantoea	Pantoea coffeiphila	ca97920f11565fb3d491f752f91bbb0e	ASV_22	0.030398	11	stable
+temperature	6	11	species20	Bacillus sp.3	Bacillus sp.3	Bacillus	Bacillus bruguierae	6d15de14e1e3b8124a5745c02e9e92ea	ASV_23	0.056565	11	stable
+temperature	7	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.941361	63	stable
+temperature	7	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.45807	59	stable
+temperature	7	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.024544	4	stable
+temperature	7	4	species4	Paenibacillus sp.1	Paenibacillus sp.1	Paenibacillus	Paenibacillus cookii	5d2d78489042634629e229ace1e0ce56	ASV_4	0.041216	4	stable
+temperature	7	5	species5	Chryseobacterium sp.1	Chryseobacterium sp.1	Chryseobacterium	Chryseobacterium timonianum	7e65f9a2a19cb9e711e4328b90cc2c3c	ASV_6	0.819008	41	stable
+temperature	7	6	species6	Bacillus sp.2	Bacillus sp.2	Bacillus	Bacillus velezensis	2990b08e6fdd30ce626c1f5d8d026587	ASV_5	0.999342	15	stable
+temperature	7	7	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.033224	21	stable
+temperature	7	8	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.028406	8	stable
+temperature	7	9	species10	Staphylococcus sp.1	Staphylococcus sp.1	Staphylococcus	Staphylococcus aureus	3a8a7409bdc33da14a01ec3e3313b9a7	ASV_10	0.460471	20	stable
+temperature	7	10	species11	Pseudomonas sp.1	Pseudomonas sp.1	Pseudomonas	Pseudomonas caspiana	727a1bc7bf5ce7252f2e59f7b3ebc105	ASV_11	0.692848	19	stable
+temperature	7	11	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.036732	5	stable
+temperature	7	12	species14	Staphylococcus sp.2	Staphylococcus sp.2	Staphylococcus	Staphylococcus saprophyticus	8d1dd222f19ae53014133f3d67f5d639	ASV_15	0.013736	3	stable
+temperature	7	13	species23	Pandoraea sp.1	Pandoraea sp.1	Pandoraea	Pandoraea faecigallinarum	2556822550fb3a55f8f74ef58112cf0b	ASV_28	0.039869	3	stable
+temperature	8	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.531228	59	stable
+temperature	8	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.977685	64	stable
+temperature	8	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.769736	32	stable
+temperature	8	4	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.190617	28	stable
+temperature	8	5	species8	Burkholderia sp.1	Burkholderia sp.1	Burkholderia	Burkholderia puraquae	71243f86c470ff2e90cecacd72cc2208	ASV_8	0.274036	5	stable
+temperature	8	6	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.025418	6	stable
+temperature	8	7	species10	Staphylococcus sp.1	Staphylococcus sp.1	Staphylococcus	Staphylococcus aureus	3a8a7409bdc33da14a01ec3e3313b9a7	ASV_10	0.545895	13	stable
+temperature	8	8	species12	Stenotrophomonas sp.1	Stenotrophomonas sp.1	Stenotrophomonas	Stenotrophomonas pavanii	41f01f3e3cbf6beb908ae1ebb553208e	ASV_12	0.485742	26	stable
+temperature	8	9	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.053099	6	stable
+temperature	8	10	species18	Burkholderia sp.2	Burkholderia sp.2	Burkholderia	Burkholderia paludis	b64cf0e9dea8cef6b9500b364c179b98	ASV_21	0.184296	7	stable
+temperature	9	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.989412	64	stable
+temperature	9	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.064586	17	stable
+temperature	9	3	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.114883	37	stable
+temperature	9	4	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.882823	38	stable
+temperature	9	5	species10	Staphylococcus sp.1	Staphylococcus sp.1	Staphylococcus	Staphylococcus aureus	3a8a7409bdc33da14a01ec3e3313b9a7	ASV_10	0.054353	2	high_abundance_single_or_pair
+temperature	9	6	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.047423	15	stable
+temperature	9	7	species14	Staphylococcus sp.2	Staphylococcus sp.2	Staphylococcus	Staphylococcus saprophyticus	8d1dd222f19ae53014133f3d67f5d639	ASV_15	0.587148	23	stable
+temperature	9	8	species17	Microbacterium sp.1	Microbacterium sp.1	Microbacterium	Microbacterium galbum	5441bf2a859d6831612daa777f982d82	ASV_20	0.139094	6	stable
+temperature	9	9	species19	Pantoea sp.2	Pantoea sp.2	Pantoea	Pantoea coffeiphila	ca97920f11565fb3d491f752f91bbb0e	ASV_22	0.021211	3	stable
+temperature	10	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.674102	64	stable
+temperature	10	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.71994	64	stable
+temperature	10	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.925654	41	stable
+temperature	10	4	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.046013	17	stable
+temperature	10	5	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.021927	9	stable
+temperature	10	6	species10	Staphylococcus sp.1	Staphylococcus sp.1	Staphylococcus	Staphylococcus aureus	3a8a7409bdc33da14a01ec3e3313b9a7	ASV_10	0.040249	4	stable
+temperature	10	7	species11	Pseudomonas sp.1	Pseudomonas sp.1	Pseudomonas	Pseudomonas caspiana	727a1bc7bf5ce7252f2e59f7b3ebc105	ASV_11	0.938222	22	stable
+temperature	10	8	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.033073	4	stable
+temperature	10	9	species14	Staphylococcus sp.2	Staphylococcus sp.2	Staphylococcus	Staphylococcus saprophyticus	8d1dd222f19ae53014133f3d67f5d639	ASV_15	0.248561	12	stable
+temperature	10	10	species16	Paenibacillus sp.2	Paenibacillus sp.2	Paenibacillus	Paenibacillus wenxiniae	90c6ca530feb88b8942b2ac321fcd56f	ASV_17	0.295591	25	stable
+temperature	11	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.984781	64	stable
+temperature	11	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.055802	20	stable
+temperature	11	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.702767	41	stable
+temperature	11	4	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.433352	22	stable
+temperature	11	5	species8	Burkholderia sp.1	Burkholderia sp.1	Burkholderia	Burkholderia puraquae	71243f86c470ff2e90cecacd72cc2208	ASV_8	0.033112	4	stable
+temperature	11	6	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.106795	25	stable
+temperature	11	7	species13	Flavobacterium sp.1	Flavobacterium sp.1	Flavobacterium	Flavobacterium acidificum	b282257dd6b7db30127a9fbbac387d3e	ASV_13	0.077355	16	stable
+temperature	11	8	species19	Pantoea sp.2	Pantoea sp.2	Pantoea	Pantoea coffeiphila	ca97920f11565fb3d491f752f91bbb0e	ASV_22	0.028483	5	stable
+temperature	12	1	species1	Klebsiella sp.1	Klebsiella sp.1	Klebsiella	Klebsiella aerogenes	a9b9df2026b59ac90c7059e630a01041	ASV_1	0.995364	62	stable
+temperature	12	2	species2	Klebsiella sp.2	Klebsiella sp.2	Klebsiella	Klebsiella variicola	102c2a7e35054842305d377f20eada37	ASV_2	0.799752	49	stable
+temperature	12	3	species3	Bacillus sp.1	Bacillus sp.1	Bacillus	Bacillus bruguierae	b9779a83e705307c6596e4741240726c	ASV_3	0.918144	33	stable
+temperature	12	4	species4	Paenibacillus sp.1	Paenibacillus sp.1	Paenibacillus	Paenibacillus cookii	5d2d78489042634629e229ace1e0ce56	ASV_4	0.997965	13	stable
+temperature	12	5	species6	Bacillus sp.2	Bacillus sp.2	Bacillus	Bacillus velezensis	2990b08e6fdd30ce626c1f5d8d026587	ASV_5	0.019087	3	stable
+temperature	12	6	species7	Pantoea sp.1	Pantoea sp.1	Pantoea	Pantoea coffeiphila	dce7f2220f3fc50b1b449a69ce504c30	ASV_7	0.334438	24	stable
+temperature	12	7	species9	Phytobacter sp.1	Phytobacter sp.1	Phytobacter	Phytobacter palmae	9fc2e45508169af54c1bf9da5c2d6f41	ASV_9	0.179694	27	stable
+temperature	12	8	species15	Curtobacterium sp.1	Curtobacterium sp.1	Curtobacterium	Curtobacterium gossypii	2555fc13894b5e276d6ac78f0f4523ef	ASV_16	0.281742	29	stable
+temperature	12	9	species19	Pantoea sp.2	Pantoea sp.2	Pantoea	Pantoea coffeiphila	ca97920f11565fb3d491f752f91bbb0e	ASV_22	0.018785	3	stable
+temperature	12	10	species20	Bacillus sp.3	Bacillus sp.3	Bacillus	Bacillus bruguierae	6d15de14e1e3b8124a5745c02e9e92ea	ASV_23	0.073288	24	stable

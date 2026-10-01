@@ -1,0 +1,23 @@
+[project]
+name = "crmodel"
+version = "2.0.0"
+description = "Consumer-resource model with pH feedback for microbial community phase diagrams"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.11",
+    "numba>=0.58",
+    "h5py>=3.9",
+    "joblib>=1.3",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.7"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

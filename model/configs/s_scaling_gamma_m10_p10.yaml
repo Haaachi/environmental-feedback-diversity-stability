@@ -1,0 +1,7 @@
+extends: base.yaml
+
+resources:
+  gamma_mode: linear_gradient
+  gamma_min: -10.0
+  gamma_max: 10.0
+  R0: 1.0

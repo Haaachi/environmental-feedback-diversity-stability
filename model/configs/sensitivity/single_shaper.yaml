@@ -1,0 +1,12 @@
+# Sensitivity: single-species pH shaping.
+# Only species 0 contributes to dp/dt; all others respond to pH
+# but do not shape it. Tests individual vs. collective pH feedback.
+#
+# This is NOT a full phase sweep — target specific (r,h) points.
+
+extends: ../base.yaml
+
+ph_shaping: first_only
+
+simulation:
+  seed_base: 600000000

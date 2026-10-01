@@ -1,0 +1,12 @@
+# NOTE: CV=0.3 is now the base configuration.
+# This overlay is kept only for backward compatibility and uses
+# the same seed_base as the original runs.
+# For new runs, use base.yaml directly.
+
+extends: ../base.yaml
+
+traits:
+  growth_cv: 0.3
+
+simulation:
+  seed_base: 100000000
