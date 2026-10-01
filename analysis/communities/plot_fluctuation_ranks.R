@@ -8,21 +8,21 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_fluctuation_rank.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 绘制震荡指标的 rank 图：
+# Rank plots of instability metrics:
 #   1. community_cv     = Σσᵢ_abs / mean_total_abs
 #   2. total_biomass_cv = std(OD_t) / mean(OD_t)
-#   3. temporal_bc_mean = 时间窗内所有天两两BC距离均值
+# 3. temporal_bc_mean: mean Bray-Curtis distance over all day pairs in the window.
 #   4. weighted_log_sd  = Σ wᵢ sd(log(absᵢ + eps))
 #
-# 默认版本：只使用 R1
-# 额外版本：temperature 项目同时输出 allrep 版本，即 R1/R2/R3 共同绘制
+# Default version: R1 only.
+# Additional temperature version: plot R1/R2/R3 together (allrep).
 #
-# 每个指标均按 rank-only 输出；阈值留待后续根据图形动态判断
-# Y轴上限：跨 full/early、跨所有工况、跨所有 replicate，各指标独立统一
+# Export rank-only plots; interpret operational guides from the plotted values.
+# Use a shared Y upper limit per metric across full/early, conditions and replicates.
 #
-# 输出: figures/fluctuations/rank/
+# Output: figures/fluctuations/rank/
 #   <metric>/
 #     full/
 #       mortality_W1.pdf ~ mortality_W5.pdf
@@ -32,7 +32,7 @@ community_workspace <- function() {
 #       temperature_W1_allrep.pdf ~ temperature_W5_allrep.pdf
 #       temperature_combined_allrep.pdf
 #     early/
-#       （同上）
+# Same structure as above.
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -47,7 +47,7 @@ FIG_DIR  <- file.path(BASE_DIR, "figures", "fluctuations", "rank")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # ============================================================
-# ── 阈值设置（在此处手动调整）───────────────────────────────
+# Operational thresholds; adjust here.
 # ============================================================
 RANK_METRICS <- list(
   sum_abs_std       = NA_real_,
@@ -69,12 +69,12 @@ threshold_for <- function(metric, experiment) {
   NA_real_
 }
 
-# ── 颜色 ─────────────────────────────────────────────────────
+# Colors
 COL_FLUCTUATION <- "#F4A460"
 COL_STABLE      <- "#9B8EC4"
 COL_RANK_ONLY   <- "#6F6F6F"
 
-# ── 图形参数 ─────────────────────────────────────────────────
+# Plot parameters
 FONT_FAMILY  <- "Arial"
 FONT_AX      <- 14
 FONT_LEGEND  <- 18
@@ -91,7 +91,7 @@ THRESHOLD_LW  <- 0.4
 THRESHOLD_LT  <- "dashed"
 THRESHOLD_COL <- "black"
 
-# ── 学术主题 ────────────────────────────────────────────────
+# Publication plot theme
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX, base_family = FONT_FAMILY) +
     theme(
@@ -123,7 +123,7 @@ theme_pub <- function() {
     )
 }
 
-# ── 核心画图函数 ─────────────────────────────────────────────
+# Core plotting function
 plot_rank <- function(df_input, metric, threshold,
                       y_upper, y_breaks, show_legend = FALSE) {
   has_threshold <- is.finite(threshold)
@@ -208,7 +208,7 @@ plot_rank <- function(df_input, metric, threshold,
   p
 }
 
-# ── 主循环：指标 × 窗口 × 实验 × 工况 ───────────────────────
+# Main loop: metrics x windows x experiments x conditions
 for (metric in names(RANK_METRICS)) {
   metric_threshold_values <- c(
     threshold_for(metric, "mortality"),
@@ -224,9 +224,9 @@ for (metric in names(RANK_METRICS)) {
                 metric))
   }
   
-  # 读取两个窗口数据
-  # all_data_allrep 用于计算全局Y轴上限，并用于 temperature allrep 图
-  # all_data_r1 用于默认 R1 图
+  # Read both windows.
+  # Use all_data_allrep for shared Y limits and temperature allrep plots.
+  # Use all_data_r1 for default R1 plots.
   all_data_allrep <- list()
   all_data_r1     <- list()
   
@@ -234,7 +234,7 @@ for (metric in names(RANK_METRICS)) {
     csv_path <- file.path(PROC_DIR, "fluctuations", window,
                           "community_level.csv")
     if (!file.exists(csv_path)) {
-      cat(sprintf("  [跳过] %s 不存在\n", csv_path))
+      cat(sprintf("  [skip] %s does not exist\n", csv_path))
       next
     }
     
@@ -260,17 +260,17 @@ for (metric in names(RANK_METRICS)) {
     all_data_allrep[[window]] <- df_tmp_allrep
     all_data_r1[[window]]     <- df_tmp_r1
     
-    cat(sprintf("  %s: %d 行 allrep, %d 行 R1\n",
+    cat(sprintf("  %s: %d rows allrep, %d rows R1\n",
                 window, nrow(df_tmp_allrep), nrow(df_tmp_r1)))
   }
   
   if (length(all_data_allrep) == 0) {
-    cat(sprintf("  [跳过] %s 无有效数据\n", metric))
+    cat(sprintf("  [skip] %s has no valid data\n", metric))
     next
   }
   
-  # 各指标独立的全局Y轴上限
-  # 使用 allrep 数据，避免 allrep 图中出现截断
+  # A separate shared Y upper limit for each metric
+  # Use allrep data to avoid clipping those figures.
   y_max_global <- max(sapply(all_data_allrep, function(d)
     max(d[[metric]], na.rm = TRUE)))
   y_upper  <- ceiling(y_max_global * 10) / 10
@@ -280,7 +280,7 @@ for (metric in names(RANK_METRICS)) {
   y_breaks <- pretty(c(0, y_upper), n = 5)
   y_breaks <- y_breaks[y_breaks <= y_upper]
   
-  cat(sprintf("  全局Y轴上限: %.2f\n", y_upper))
+  cat(sprintf("  Shared Y-axis upper limit: %.2f\n", y_upper))
   
   for (window in c("full", "early", "last4")) {
     if (!window %in% names(all_data_r1)) next
@@ -299,7 +299,7 @@ for (metric in names(RANK_METRICS)) {
       has_threshold <- is.finite(threshold)
       
       # ======================================================
-      # 默认版本：R1 only
+      # Default version: R1 only.
       # ======================================================
       df_exp <- df_window_r1 %>%
         filter(experiment == !!experiment)
@@ -366,8 +366,8 @@ for (metric in names(RANK_METRICS)) {
       }
       
       # ======================================================
-      # 额外版本：temperature allrep，即 R1/R2/R3 共同绘制
-      # 仅 temperature 输出
+      # Additional temperature allrep version: R1/R2/R3 together.
+      # Export this version for temperature only.
       # ======================================================
       if (experiment == "temperature") {
         
@@ -448,8 +448,8 @@ for (metric in names(RANK_METRICS)) {
   }
 }
 
-cat("\n完成！\n")
-cat(sprintf("输出目录: figures/fluctuations/rank/\n"))
+cat("\nDone!\n")
+cat(sprintf("Output directory: figures/fluctuations/rank/\n"))
 cat("  sum_abs_std/       (mortality threshold=0.20; temperature threshold=0.15)\n")
 cat("  sum_rel_std/       (rank only; no threshold)\n")
 cat("  temporal_bc_mean/  (rank only; no threshold)\n")
@@ -459,6 +459,6 @@ cat("  community_cv/      (threshold=0.265)\n")
 cat("  community_cv_rel/  (rank only; no threshold)\n")
 cat("  total_biomass_std/ (rank only; no threshold)\n")
 cat("  total_biomass_cv/  (rank only; no threshold)\n")
-cat("\n额外新增 temperature allrep 图：\n")
+cat("\nAdditional temperature allrep figures:\n")
 cat("  temperature_W1_allrep.pdf ~ temperature_W5_allrep.pdf\n")
 cat("  temperature_combined_allrep.pdf\n")

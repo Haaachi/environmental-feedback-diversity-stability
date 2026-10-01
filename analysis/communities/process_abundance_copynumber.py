@@ -1,59 +1,29 @@
 """
-process_abundance.py
-主目录: /home/hachi/Tem_mortality_workspace
+Parse unified sequencing and OD workbooks and reconstruct 16S copy-number
+corrected relative and absolute abundance. Retain uncorrected abundance for
+comparison and export per-condition tables and a color map.
 
-功能
-----
-1. 从统一测序 Excel 和 OD Excel 中解析数据
-2. 加载 species annotation，并读取 16S rRNA gene copy number
-3. 基于 16S rRNA gene copy number 校正 reads
-4. 计算 copy-number corrected relative abundance 和 absolute abundance
-5. 同时保留 raw relative abundance / raw absolute abundance 作为对照
-6. 输出 processed/{experiment}/W*/abs_abundance.csv
-7. 输出 processed/color_map.csv
+The annotation file with 16S rRNA gene copy numbers is preferred:
+    data/Unified_species_annotations_with_16S_copy_number.xlsx
+If absent, try the existing unified species annotation files.
 
-重要说明
---------
-请把带 16S copy number 的注释表放在：
+Raw relative abundance uses each taxon's reads divided by total sample reads.
+Corrected reads are raw reads divided by the taxon's 16S copy number; normalize
+these corrected reads within each sample to reconstruct corrected proportions.
+Missing or invalid copy numbers default to one, implying no correction.
 
-    /home/hachi/Tem_mortality_workspace/data/Unified_species_annotations_with_16S_copy_number.xlsx
+Output fields:
+    rel_abund_raw: uncorrected relative abundance, percent.
+    abs_abund_raw: rel_abund_raw / 100 * matched OD.
+    rel_abund: copy-number corrected relative abundance, percent.
+    abs_abund: rel_abund / 100 * matched OD.
+Outputs: processed/{experiment}/W*/abs_abundance.csv and processed/color_map.csv.
 
-脚本会优先读取这个文件。
-如果没有找到它，才会依次尝试读取原来的 Unified_species_annotations.xlsx 等文件。
-
-16S 多拷贝校正逻辑
-------------------
-原始相对丰度：
-
-    rel_abund_raw = reads / sum(reads) * 100
-
-多拷贝校正：
-
-    reads_copy_corrected = reads / copy_number_16s
-    rel_abund = reads_copy_corrected / sum(reads_copy_corrected) * 100
-    abs_abund = rel_abund / 100 * OD
-
-也就是说，输出中的：
-
-    rel_abund_raw  = 未做多拷贝校正的相对丰度
-    abs_abund_raw  = 未做多拷贝校正的绝对丰度
-    rel_abund      = 做过 16S 多拷贝校正后的相对丰度
-    abs_abund      = 做过 16S 多拷贝校正后的绝对丰度
-
-颜色映射设计（保留最初版风格 + 轻量分类约束）
------------------------------------------------
-**风格**（完全沿用你最初版）：
-  - HSL 色彩空间
-  - 跳过红色 (0.00-0.06, 0.92-1.00) 和纯绿色 (0.28-0.42)
-  - 6 种 sat/lum 组合循环，中等亮度
-  - interleaving 排列：相邻 species 拿到 hue 距离最远的位置
-  - mortality / temperature 用 hue_start offset 错开 (0.0 / 0.5)
-
-**唯一的分类约束**：
-  - species 在 hue 轴上的位置由"taxon 字典序"改成
-    "phylum → family → genus → taxon 数字号"排序后的位次
-  - 这样同 family/genus 的 species 拿到相邻 hue slot，色相相近
-  - 但 sat/lum 组合循环 + interleaving 仍然让每个 species 清晰可分
+The HSL palette excludes red and pure green, cycles six saturation/lightness
+combinations, and interleaves distant hue slots. Taxonomic ordering uses phylum,
+family, genus and numeric taxon ID. Related species receive nearby virtual slots
+while interleaving and saturation/lightness variants maintain contrast.
+Independent offsets distinguish the temperature and mortality libraries.
 """
 
 import re
@@ -68,7 +38,7 @@ BASE_DIR = os.environ.get("COMMUNITY_WORKSPACE", os.path.dirname(os.path.abspath
 DATA_DIR  = os.path.join(BASE_DIR, "data")
 OUT_DIR   = os.path.join(BASE_DIR, "processed")
 
-# 优先读取带 16S copy number 的注释文件
+# Prefer annotations containing 16S copy numbers.
 ANNOTATION_CANDIDATES = [
     os.path.join(DATA_DIR, "Unified_species_annotations_with_16S_copy_number.xlsx"),
     os.path.join(DATA_DIR, "Unified_species_annotations.xlsx"),
@@ -262,39 +232,15 @@ def parse_od_excel(path, experiment):
 
 def compute_abundance(seq_df, od_df):
     """
-    计算丰度。
+    Compute raw and 16S copy-number corrected abundance.
 
-    这里假设 seq_df 已经通过 attach_annotations() 合并了 annotation，
-    因而包含 copy_number_16s 字段。
+    seq_df has already been joined to annotations by attach_annotations(), including
+    copy_number_16s. Raw reads and sample read totals define uncorrected relative
+    abundance. Divide each taxon's reads by its copy number and normalize corrected
+    reads within the sample to obtain corrected relative abundance.
 
-    输出字段说明
-    ----------
-    reads:
-        原始测序 reads
-
-    total_reads:
-        每个 sample 的原始 reads 总和
-
-    rel_abund_raw:
-        未做 16S 多拷贝校正的相对丰度，单位 %
-
-    copy_number_16s:
-        每个 taxon 的 16S rRNA gene copy number
-
-    reads_copy_corrected:
-        reads / copy_number_16s
-
-    total_reads_copy_corrected:
-        每个 sample 内 copy-number corrected reads 的总和
-
-    rel_abund:
-        做过 16S 多拷贝校正后的相对丰度，单位 %
-
-    abs_abund_raw:
-        未做 16S 多拷贝校正的绝对丰度，计算为 rel_abund_raw / 100 * OD
-
-    abs_abund:
-        做过 16S 多拷贝校正后的绝对丰度，计算为 rel_abund / 100 * OD
+    Relative-abundance fields are percentages. Absolute abundance is the corresponding
+    relative abundance / 100 * matched OD. Retain both raw and corrected fields.
     """
     df = seq_df.copy()
 
@@ -302,7 +248,7 @@ def compute_abundance(seq_df, od_df):
         return df
 
     # ------------------------------------------------------------
-    # 1. 原始 reads 总和，用于保留 raw relative abundance
+    # 1. Sum raw reads to retain uncorrected relative abundance.
     # ------------------------------------------------------------
     raw_totals = (
         df.dropna(subset=["reads"])
@@ -325,8 +271,8 @@ def compute_abundance(seq_df, od_df):
     )
 
     # ------------------------------------------------------------
-    # 2. 读取 16S copy number
-    #    如果没有 copy number，则默认 1.0，相当于不校正
+    # 2. Read 16S copy numbers.
+    # Missing copy numbers default to 1.0, implying no correction.
     # ------------------------------------------------------------
     if "copy_number_16s" not in df.columns:
         df["copy_number_16s"] = 1.0
@@ -341,7 +287,7 @@ def compute_abundance(seq_df, od_df):
         np.nan,
     )
 
-    # copy number 缺失、为 0 或负数时，默认按 1 处理
+    # Missing, zero or negative copy numbers are treated as one.
     df["copy_number_16s"] = np.where(
         df["copy_number_16s"].isna() | (df["copy_number_16s"] <= 0),
         1.0,
@@ -349,7 +295,7 @@ def compute_abundance(seq_df, od_df):
     )
 
     # ------------------------------------------------------------
-    # 3. 多拷贝校正后的 reads
+    # 3. Compute copy-number corrected reads.
     # ------------------------------------------------------------
     df["reads_copy_corrected"] = np.where(
         df["reads"].isna(),
@@ -372,8 +318,8 @@ def compute_abundance(seq_df, od_df):
     )
 
     # ------------------------------------------------------------
-    # 4. 校正后的 relative abundance
-    #    注意：这里 rel_abund 是 copy-number corrected 结果
+    # 4. Compute corrected relative abundance.
+    # rel_abund here contains copy-number corrected results.
     # ------------------------------------------------------------
     df["rel_abund"] = np.where(
         df["reads_copy_corrected"].isna() | (df["total_reads_copy_corrected"] == 0),
@@ -382,7 +328,7 @@ def compute_abundance(seq_df, od_df):
     )
 
     # ------------------------------------------------------------
-    # 5. 合并 OD，计算 absolute abundance
+    # 5. Join OD and reconstruct absolute abundance.
     # ------------------------------------------------------------
     df = df.merge(
         od_df,
@@ -390,14 +336,14 @@ def compute_abundance(seq_df, od_df):
         how="left",
     )
 
-    # 未校正 absolute abundance，保留作对照
+    # Retain uncorrected absolute abundance for comparison.
     df["abs_abund_raw"] = np.where(
         df["rel_abund_raw"].isna() | df["OD"].isna(),
         np.nan,
         df["rel_abund_raw"] / 100.0 * df["OD"],
     )
 
-    # 校正后的 absolute abundance
+    # Copy-number corrected absolute abundance
     df["abs_abund"] = np.where(
         df["rel_abund"].isna() | df["OD"].isna(),
         np.nan,
@@ -630,13 +576,13 @@ def attach_annotations(df, annotation_df):
 
 # =====================================================================
 #  Color palette
-#  原版风格 + 轻量分类排序约束
+# Original palette style with taxonomic ordering
 # =====================================================================
 
-# 可用 hue 区间：跳过红色 + 跳过纯绿色（沿用原版）
+# Available hue ranges exclude red and pure green, as in the source.
 HUE_SEGMENTS = [(0.06, 0.28), (0.42, 0.92)]
 
-# Sat/Lum 6 种组合循环（完全沿用原版数值）
+# Cycle six saturation/lightness combinations using the original values.
 SAT_LUM = [
     (0.80, 0.48),
     (0.62, 0.58),
@@ -646,7 +592,7 @@ SAT_LUM = [
     (0.68, 0.60),
 ]
 
-# mortality / temperature 在虚拟 hue 轴上的起始偏移（沿用原版思路）
+# Independent mortality/temperature offsets on the virtual hue axis.
 HUE_OFFSET = {
     "mortality":   0.0,
     "temperature": 0.5,
@@ -658,7 +604,9 @@ def _hue_total_len():
 
 
 def _pos_to_hue(pos):
-    """虚拟位置 → 真实 hue（跳过红/绿禁区）"""
+    """
+    Map a virtual position to an actual hue, skipping excluded red/green ranges.
+    """
     total_len = _hue_total_len()
     pos = pos % total_len
 
@@ -682,7 +630,9 @@ def _hsl_to_hex(h, s, l):
 
 
 def _interleave_indices(n):
-    """原版 interleaving: 0, n//2, 1, n//2+1, ..."""
+    """
+    Interleave indices as 0, n//2, 1, n//2+1, and so on.
+    """
     if n <= 1:
         return list(range(n))
 
@@ -704,18 +654,17 @@ def _interleave_indices(n):
 
 def _generate_palette_for_experiment(df_exp, hue_offset):
     """
-    一个实验内的 species 染色。
+    Generate one experiment's species palette.
 
-    流程：
-      1. 按 phylum → family → genus → taxon_number 排序 species
-      2. 在虚拟 hue 轴上等距分配 n 个位置
-      3. 用原版 interleaving 把位置打散
-      4. sat/lum 6 组循环
-      5. hue_offset 让 mortality / temperature 在色环上错开
+    1. Sort species by phylum, family, genus and numeric taxon ID.
+    2. Allocate equally spaced positions on the virtual hue axis.
+    3. Interleave positions using the source ordering.
+    4. Cycle six saturation/lightness combinations.
+    5. Offset mortality and temperature on the color wheel.
     """
     df = df_exp.copy()
 
-    # 填默认值，保证排序稳定
+    # Fill defaults to ensure stable sorting.
     for col in ["phylum", "family", "genus", "unified_annotation"]:
         if col not in df.columns:
             df[col] = ""
@@ -728,7 +677,7 @@ def _generate_palette_for_experiment(df_exp, hue_offset):
 
     df["taxon_number"] = df["taxon"].apply(lambda x: natural_taxon_key(x)[1])
 
-    # 关键：按分类层级排序，而不是字典序
+    # Sort by taxonomic hierarchy rather than alphabetical order.
     df = df.sort_values(
         ["phylum", "family", "genus", "taxon_number", "taxon"]
     ).reset_index(drop=True)
@@ -740,17 +689,17 @@ def _generate_palette_for_experiment(df_exp, hue_offset):
 
     total_len = _hue_total_len()
 
-    # 等距虚拟位置（与原版一致）
+    # Equally spaced virtual positions, as in the source.
     positions = [total_len * i / n for i in range(n)]
 
-    # 原版 interleaving：把相邻 hue slot 打散
+    # Interleave to separate adjacent hue slots.
     order = _interleave_indices(n)
     interleaved = [positions[i] for i in order]
 
-    # 真实 hue + offset
+    # Actual hue plus offset
     hues = [_pos_to_hue(p + hue_offset * total_len) for p in interleaved]
 
-    # sat/lum 6 组循环（slot 顺序，与原版一致）
+    # Cycle six saturation/lightness combinations by slot, as in the source.
     colors = []
     for i, h in enumerate(hues):
         s, l = SAT_LUM[i % len(SAT_LUM)]
@@ -762,8 +711,8 @@ def _generate_palette_for_experiment(df_exp, hue_offset):
 
 def generate_color_palette(mortality_taxa, temperature_taxa, annotation_df=None):
     """
-    mortality / temperature 独立染色，颜色不共享。
-    返回长格式 color_map: taxon, experiment, color, + annotation 字段
+    Generate independent temperature and mortality palettes.
+    Return a long-format table with taxon, experiment, color and annotation fields.
     """
     rows = []
 
@@ -833,20 +782,20 @@ def main():
     annotation_df = load_annotation_map()
 
     for exp in ["mortality", "temperature"]:
-        print(f"\n处理 {exp} (OD背景: {OD_BACKGROUND[exp]})...")
+        print(f"\nProcessing {exp} (OD background: {OD_BACKGROUND[exp]})...")
 
         seq_df = parse_seq_excel(SEQ_FILES[exp], exp)
         od_df  = parse_od_excel(OD_FILES[exp], exp)
 
-        # 关键修改：先合并 species annotation 和 16S copy number
+        # Join species annotations and 16S copy numbers first.
         seq_df = attach_annotations(seq_df, annotation_df)
 
-        # 再计算 copy-number corrected abundance
+        # Then calculate copy-number corrected abundance.
         df = compute_abundance(seq_df, od_df)
 
-        print(f"  -> 记录数: {len(df)}, Taxon: {df['taxon'].nunique()}")
+        print(f"  -> Records: {len(df)}, Taxon: {df['taxon'].nunique()}")
 
-        # 检查是否还有未匹配 copy number 的 taxon
+        # Check for taxa without matched copy numbers.
         missing_cn = (
             df[["taxon", "copy_number_16s"]]
             .drop_duplicates()
@@ -871,11 +820,11 @@ def main():
                 .to_csv(out_path, index=False)
             )
 
-        print(f"  -> 已保存至 {OUT_DIR}/{exp}/W1~W5/")
+        print(f"  -> Saved to {OUT_DIR}/{exp}/W1~W5/")
 
         all_dfs.append(df)
 
-    print("\n生成色板（原版 HSL 风格 + 分类排序约束）...")
+    print("\nGenerating palette (original HSL style + taxonomic ordering)...")
 
     all_df = pd.concat(all_dfs, ignore_index=True)
 
@@ -887,9 +836,9 @@ def main():
     color_path = os.path.join(OUT_DIR, "color_map.csv")
     color_df.to_csv(color_path, index=False)
 
-    print(f"  -> {len(color_df)} 色 → {color_path}")
+    print(f"  -> {len(color_df)} colors -> {color_path}")
 
-    print("\n完成！")
+    print("\nDone!")
 
 
 if __name__ == "__main__":

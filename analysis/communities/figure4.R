@@ -8,13 +8,13 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_mortality_diversity_cv_zones.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# mortality 工况 early + full 窗口
+# Dilution-factor experiment (legacy identifier mortality), early + full windows.
 # shannon / gamma_shannon vs community_cv
-# 背景按稳定性和多样性分区着色（3区域，无分隔线）
-# 散点颜色: 震荡/稳定 | 形状: 稀释率
-# 主图无图例，图例单独输出
+# Shade three descriptive instability-diversity regions without dividing lines.
+# Point color: fluctuating/stable; shape: dilution factor.
+# Export legends separately from the main figure.
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -25,7 +25,7 @@ suppressPackageStartupMessages({
 })
 
 # ============================================================
-# ══ 绘图参数 ══════════════════════════════════════════════════
+# Plot parameters
 # ============================================================
 
 W_PLOT <- 65
@@ -44,20 +44,20 @@ DOT_ALPHA <- 1
 
 N_TICKS <- 3
 
-# ── 分区阈值 ─────────────────────────────────────────────────
+# Descriptive region boundaries
 CV_THRESHOLD        <- 0.25
 DIVERSITY_THRESHOLD <- 0.8
 
-# ── 背景分区颜色 ─────────────────────────────────────────────
-ZONE_COLOR_STABLE        <- "#E8E4F0"   # 稳定（浅柔紫）
-ZONE_COLOR_FLUC_LOW      <- "#FDE8D0"   # 震荡+低多样性（浅暖沙橙）
-ZONE_COLOR_FLUC_HIGH     <- "#FAD4B5"   # 震荡+高多样性（中暖沙橙）
+# Background region colors
+ZONE_COLOR_STABLE        <- "#E8E4F0"   # Stable: pale soft purple
+ZONE_COLOR_FLUC_LOW      <- "#FDE8D0"   # Fluctuating with low diversity: pale warm sand orange
+ZONE_COLOR_FLUC_HIGH     <- "#FAD4B5"   # Fluctuating with high diversity: medium warm sand orange
 
-# ── 散点颜色（震荡 vs 稳定） ─────────────────────────────────
-COL_STABLE      <- "#9B8EC4"   # 稳定柔紫
-COL_FLUCTUATION <- "#F4A460"   # 震荡暖沙橙
+# Point colors: fluctuating versus stable
+COL_STABLE      <- "#9B8EC4"   # Stable: soft purple
+COL_FLUCTUATION <- "#F4A460"   # Fluctuating: warm sand orange
 
-# ── 稀释率形状 ───────────────────────────────────────────────
+# Dilution-factor shapes
 COND_SHAPES <- c(
   "W1" = 16,
   "W2" = 17,
@@ -74,14 +74,14 @@ COND_LABELS <- c(
   "W5" = "10\u2075"
 )
 
-# ── X/Y 轴范围 ───────────────────────────────────────────────
+# X/Y axis limits
 X_LO <- 0
 X_HI <- 1.2
 Y_LO <- 0
 Y_HI <- 1.6
 
 # ============================================================
-# ── 路径配置 ──────────────────────────────────────────────────
+# Path configuration
 # ============================================================
 BASE_DIR <- community_workspace()
 PROC_DIR <- file.path(BASE_DIR, "processed")
@@ -89,7 +89,7 @@ FIG_DIR  <- file.path(BASE_DIR, "figures", "mortality_diversity_cv_zones")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # ============================================================
-# ── 工具函数 ──────────────────────────────────────────────────
+# Helper functions
 # ============================================================
 
 make_ticks <- function(lo, hi, n = N_TICKS) {
@@ -178,7 +178,7 @@ add_threshold_gamma_richness <- function(gamma_div, abs_df) {
 }
 
 # ============================================================
-# ── 核心画图函数：主散点图（无图例，无分隔线） ──────────────
+# Main scatter plot: no legend or dividing lines
 # ============================================================
 make_zone_scatter <- function(df_plot) {
   
@@ -186,7 +186,7 @@ make_zone_scatter <- function(df_plot) {
   y_hi <- axis_hi_1_decimal(df_plot$value, Y_HI)
   y_breaks <- make_ticks(Y_LO, y_hi)
   
-  # 分区背景数据
+  # Background region data
   zone_rects <- data.frame(
     xmin = c(0,             CV_THRESHOLD,  CV_THRESHOLD),
     xmax = c(CV_THRESHOLD,  X_HI,          X_HI),
@@ -204,7 +204,7 @@ make_zone_scatter <- function(df_plot) {
   )
   
   ggplot(df_plot, aes(x = x_val, y = value)) +
-    # 背景分区（无分隔线，纯颜色过渡）
+    # Shade regions using color only, without dividing lines.
     geom_rect(data = zone_rects,
               aes(xmin = xmin, xmax = xmax,
                   ymin = ymin, ymax = ymax,
@@ -212,14 +212,14 @@ make_zone_scatter <- function(df_plot) {
               alpha = 0.5, inherit.aes = FALSE) +
     scale_fill_manual(values = zone_colors) +
     
-    # 散点：颜色 = 震荡/稳定，形状 = 稀释率
+    # Points: color encodes instability group; shape encodes dilution factor.
     geom_point(aes(color = fluctuating, shape = condition),
                size = DOT_SIZE, alpha = DOT_ALPHA) +
     scale_color_manual(values = c("TRUE" = COL_FLUCTUATION, 
                                   "FALSE" = COL_STABLE)) +
     scale_shape_manual(values = COND_SHAPES) +
     
-    # 坐标轴
+    # Axes
     scale_x_continuous(
       breaks   = x_breaks,
       labels   = fmt_axis(x_breaks),
@@ -240,10 +240,10 @@ make_zone_scatter <- function(df_plot) {
 }
 
 # ============================================================
-# ── 图例构建函数 ──────────────────────────────────────────────
+# Legend builders
 # ============================================================
 
-# 图例1：震荡/稳定颜色
+# Legend 1: fluctuating/stable colors
 make_stability_legend_plot <- function() {
   legend_df <- data.frame(
     stability = factor(c("Stable", "Fluctuating"), 
@@ -269,8 +269,8 @@ make_stability_legend_plot <- function() {
     )
 }
 
-# 图例2：稀释率形状（无文字标签）
-# 图例2：稀释率形状（只显示标签，无标题）
+# Legend 2: dilution-factor shapes
+# Show labels without a legend title.
 make_dilution_shape_legend_plot <- function() {
   legend_df <- data.frame(
     condition = factor(paste0("W", 1:5), levels = paste0("W", 1:5)),
@@ -295,7 +295,7 @@ make_dilution_shape_legend_plot <- function() {
     )
 }
 
-# 图例3：背景分区色块
+# Legend 3: background region swatches
 make_zone_legend_plot <- function() {
   zone_df <- data.frame(
     zone = factor(
@@ -353,7 +353,7 @@ save_legend <- function(plot_with_legend, filepath, width_mm, height_mm) {
 }
 
 # ============================================================
-# ── 主流程 ────────────────────────────────────────────────────
+# Main workflow
 # ============================================================
 
 for (experiment in c("mortality", "temperature")) {
@@ -362,7 +362,7 @@ for (window in c("early", "full")) {
   
   cat(sprintf("\n========== %s - %s ==========\n", experiment, window))
   
-  # ── 读取数据 ────────────────────────────────────────────────
+  # Read data.
   fluc_path <- file.path(PROC_DIR, "fluctuations", window, "community_level.csv")
   if (!file.exists(fluc_path)) {
     cat(sprintf("  [SKIP] Fluctuation file not found: %s\n", fluc_path))
@@ -413,7 +413,7 @@ for (window in c("early", "full")) {
   df_shannon       <- build_plot_data(alpha_div, "shannon")
   df_gamma_shannon <- build_plot_data(gamma_div, "gamma_shannon")
   
-  # ── 绘制并保存主图 ──────────────────────────────────────────
+  # Draw and save the main figure.
   if (nrow(df_shannon) >= 1) {
     p1 <- make_zone_scatter(df_shannon)
     ggsave(
@@ -473,10 +473,10 @@ for (window in c("early", "full")) {
 }
 
 # ============================================================
-# ── 生成并保存图例 ────────────────────────────────────────────
+# Generate and save legends.
 # ============================================================
 
-# 震荡/稳定颜色图例
+# Fluctuating/stable color legend
 p_legend_stability <- make_stability_legend_plot()
 save_legend(
   p_legend_stability,
@@ -485,7 +485,7 @@ save_legend(
 )
 cat("  -> legend_stability.pdf\n")
 
-# 稀释率形状图例（两行排列）
+# Dilution-factor shape legend in two rows
 p_legend_shape <- make_dilution_shape_legend_plot()
 save_legend(
   p_legend_shape,
@@ -494,7 +494,7 @@ save_legend(
 )
 cat("  -> legend_dilution_shape.pdf\n")
 
-# 背景分区色块图例
+# Background region legend
 p_legend_zone <- make_zone_legend_plot()
 save_legend(
   p_legend_zone,
@@ -504,22 +504,22 @@ save_legend(
 cat("  -> legend_zones.pdf\n")
 
 # ============================================================
-# 完成提示
+# Completion messages
 # ============================================================
-cat("\n完成！\n\n")
-cat("输出目录：figures/mortality_diversity_cv_zones/\n")
-cat("\n生成文件：\n")
-cat("  主图：\n")
+cat("\nDone!\n\n")
+cat("Output directory: figures/mortality_diversity_cv_zones/\n")
+cat("\nGenerated files:\n")
+cat("  Main figures:\n")
 cat("    shannon_vs_community_cv_mortality_early.pdf\n")
 cat("    shannon_vs_community_cv_mortality_full.pdf\n")
 cat("    gamma_shannon_vs_community_cv_mortality_early.pdf\n")
 cat("    gamma_shannon_vs_community_cv_mortality_full.pdf\n")
-cat("  图例：\n")
-cat("    legend_stability.pdf        (震荡/稳定颜色)\n")
-cat("    legend_dilution_shape.pdf   (稀释率形状)\n")
-cat("    legend_zones.pdf            (背景分区色块)\n")
-cat("\n设计说明：\n")
-cat("  - 背景三色块：无分隔线，纯颜色区分\n")
-cat("  - 散点颜色：震荡(暖沙橙) vs 稳定(柔紫)\n")
-cat("  - 散点形状：W1-W5 区分稀释率\n")
-cat(sprintf("  - 阈值: CV=%.2f, Diversity=%.1f\n", CV_THRESHOLD, DIVERSITY_THRESHOLD))
+cat("  Legends:\n")
+cat("    legend_stability.pdf        (fluctuating/stable colors)\n")
+cat("    legend_dilution_shape.pdf   (dilution-factor shapes)\n")
+cat("    legend_zones.pdf            (background region swatches)\n")
+cat("\nDesign notes:\n")
+cat("  - Three background regions distinguished by color without dividing lines\n")
+cat("  - Point colors: fluctuating (warm sand orange) versus stable (soft purple)\n")
+cat("  - Point shapes: W1-W5 encode dilution factor\n")
+cat(sprintf("  - Boundaries: CV=%.2f, Diversity=%.1f\n", CV_THRESHOLD, DIVERSITY_THRESHOLD))

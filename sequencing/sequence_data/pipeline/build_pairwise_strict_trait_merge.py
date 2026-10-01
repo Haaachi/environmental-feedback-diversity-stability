@@ -21,6 +21,8 @@ from typing import Any
 
 import pandas as pd
 
+from english_schema import normalize_frame
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STRICT = (
@@ -144,23 +146,23 @@ def best_substring_identity(query: str, target: str) -> dict[str, object]:
 
 
 def read_strict(path: Path) -> pd.DataFrame:
-    df = pd.read_csv(path, sep="\t", encoding="utf-8-sig")
-    df["Candidate_IDs"] = df["对应库编号"].map(split_ids)
+    df = normalize_frame(pd.read_csv(path, sep="\t", encoding="utf-8-sig"))
+    df["Candidate_IDs"] = df["Library_IDs"].map(split_ids)
     df["Candidate_Set"] = df["Candidate_IDs"].map(set)
     return df
 
 
 def read_library_taxonomy(path: Path) -> dict[str, dict[str, str]]:
-    df = pd.read_excel(path, sheet_name=0, header=2)
-    df = df[df["菌株编号"].notna()].copy()
-    df["菌株编号"] = df["菌株编号"].astype(str).str.strip()
+    df = normalize_frame(pd.read_excel(path, sheet_name=0, header=2))
+    df = df[df["Strain_ID"].notna()].copy()
+    df["Strain_ID"] = df["Strain_ID"].astype(str).str.strip()
     taxonomy: dict[str, dict[str, str]] = {}
     for _, row in df.iterrows():
-        strain_id = clean(row["菌株编号"])
+        strain_id = clean(row["Strain_ID"])
         taxonomy[strain_id] = {
             "Group_ID": clean(row["Group ID"]),
             "Species": clean(row["Species"]),
-            "Blast_annotation": clean(row["BLAST原始注释"]),
+            "Blast_annotation": clean(row["Original_BLAST_annotation"]),
             "Genus": clean(row["Genus"]),
         }
     return taxonomy
@@ -171,7 +173,7 @@ def taxon_text(ids: list[str], taxonomy: dict[str, dict[str, str]]) -> str:
     for strain_id in ids:
         tax = taxonomy.get(strain_id)
         if tax is None:
-            parts.append(f"{strain_id}=缺少库全长注释")
+            parts.append(f"{strain_id}=missing_library_full_length_annotation")
             continue
         label = tax["Species"] or tax["Blast_annotation"] or tax["Genus"]
         group_id = tax["Group_ID"]
@@ -234,21 +236,21 @@ def note_for_independent(
         if exact:
             details = []
             for mort in exact:
-                details.append(f"mortality {mort} 同时exact匹配 temperature {','.join(exact_by_mort[mort])}")
-            return "独立保留-短片段非唯一", "；".join(details)
+                details.append(f"mortality {mort} exactly matches multiple temperature {','.join(exact_by_mort[mort])}")
+            return "retained_separately_nonunique_fragment", "; ".join(details)
     else:
         exact = exact_by_mort.get(species, [])
         if exact:
             details = []
             for temp in exact:
-                details.append(f"temperature {temp} 同时exact匹配 mortality {','.join(exact_by_temp[temp])}")
-            return "独立保留-短片段非唯一", "；".join(details)
+                details.append(f"temperature {temp} exactly matches multiple mortality {','.join(exact_by_temp[temp])}")
+            return "retained_separately_nonunique_fragment", "; ".join(details)
 
     counterpart, identity = best_counterpart(species, experiment, pairwise)
     if counterpart:
         other = "mortality" if experiment == "temperature" else "temperature"
-        return "独立保留-无唯一exact", f"最佳跨实验片段匹配: {other} {counterpart}, identity={identity:.3f}%"
-    return "独立保留-无跨实验匹配", ""
+        return "retained_separately_no_unique_exact_match", f"Best cross-experiment fragment match: {other} {counterpart}, identity={identity:.3f}%"
+    return "retained_separately_no_cross_experiment_match", ""
 
 
 def row_from_single(
@@ -258,24 +260,24 @@ def row_from_single(
     note: str,
 ) -> dict[str, object]:
     candidate_ids = sorted_library_ids(set(source_row["Candidate_Set"]))
-    experiment = clean(source_row["实验"])
+    experiment = clean(source_row["Experiment"])
     return {
         "Merged_ID": "",
-        "合并状态": status,
-        "温度species": f"{source_row['实验Species编号']}({source_row['实验注释']})"
+        "Merge_status": status,
+        "Temperature_species": f"{source_row['Experimental_species_ID']}({source_row['Experimental_annotation']})"
         if experiment == "temperature"
         else "",
-        "死亡率species": f"{source_row['实验Species编号']}({source_row['实验注释']})"
+        "Mortality_species": f"{source_row['Experimental_species_ID']}({source_row['Experimental_annotation']})"
         if experiment == "mortality"
         else "",
-        "温度注释": clean(source_row["实验注释"]) if experiment == "temperature" else "",
-        "死亡率注释": clean(source_row["实验注释"]) if experiment == "mortality" else "",
-        "推荐测量库编号": ";".join(candidate_ids),
-        "优先库编号": candidate_ids[0] if candidate_ids else "",
-        "库全长注释": taxon_text(candidate_ids, taxonomy),
-        "片段比对依据": "未自动合并",
-        "原始species数": 1,
-        "备注": note,
+        "Temperature_annotation": clean(source_row["Experimental_annotation"]) if experiment == "temperature" else "",
+        "Mortality_annotation": clean(source_row["Experimental_annotation"]) if experiment == "mortality" else "",
+        "Recommended_library_IDs": ";".join(candidate_ids),
+        "Preferred_library_ID": candidate_ids[0] if candidate_ids else "",
+        "Library_full_length_annotation": taxon_text(candidate_ids, taxonomy),
+        "Fragment_alignment_basis": "Not automatically merged",
+        "Original_species_count": 1,
+        "Notes": note,
     }
 
 
@@ -289,21 +291,21 @@ def row_from_pair(
     candidate_ids = sorted_library_ids(shared)
     return {
         "Merged_ID": "",
-        "合并状态": "自动合并-唯一互惠exact片段",
-        "温度species": f"{temp_row['实验Species编号']}({temp_row['实验注释']})",
-        "死亡率species": f"{mort_row['实验Species编号']}({mort_row['实验注释']})",
-        "温度注释": clean(temp_row["实验注释"]),
-        "死亡率注释": clean(mort_row["实验注释"]),
-        "推荐测量库编号": ";".join(candidate_ids),
-        "优先库编号": candidate_ids[0] if candidate_ids else "",
-        "库全长注释": taxon_text(candidate_ids, taxonomy),
-        "片段比对依据": (
-            "mortality V4a 对 temperature V4V5 对应片段 100% exact; "
+        "Merge_status": "auto_merged_unique_reciprocal_exact_fragment",
+        "Temperature_species": f"{temp_row['Experimental_species_ID']}({temp_row['Experimental_annotation']})",
+        "Mortality_species": f"{mort_row['Experimental_species_ID']}({mort_row['Experimental_annotation']})",
+        "Temperature_annotation": clean(temp_row["Experimental_annotation"]),
+        "Mortality_annotation": clean(mort_row["Experimental_annotation"]),
+        "Recommended_library_IDs": ";".join(candidate_ids),
+        "Preferred_library_ID": candidate_ids[0] if candidate_ids else "",
+        "Library_full_length_annotation": taxon_text(candidate_ids, taxonomy),
+        "Fragment_alignment_basis": (
+            "mortality V4a matches the corresponding temperature V4V5 fragment exactly (100%); "
             f"start={result['target_start_1based']}; orientation={result['orientation']}; "
-            "且两侧均唯一"
+            "unique on both sides"
         ),
-        "原始species数": 2,
-        "备注": "",
+        "Original_species_count": 2,
+        "Notes": "",
     }
 
 
@@ -314,7 +316,7 @@ def build_rows(
     exact_by_temp: dict[str, list[str]],
     exact_by_mort: dict[str, list[str]],
 ) -> list[dict[str, object]]:
-    by_key = {(row["实验"], row["实验Species编号"]): row for _, row in strict.iterrows()}
+    by_key = {(row["Experiment"], row["Experimental_species_ID"]): row for _, row in strict.iterrows()}
 
     auto_pairs: list[tuple[str, str]] = []
     for temp_species, mort_species_list in exact_by_temp.items():
@@ -341,12 +343,12 @@ def build_rows(
         used.add(mort_key)
 
     for _, source_row in strict.iterrows():
-        key = (source_row["实验"], source_row["实验Species编号"])
+        key = (source_row["Experiment"], source_row["Experimental_species_ID"])
         if key in used:
             continue
         status, note = note_for_independent(
-            source_row["实验Species编号"],
-            source_row["实验"],
+            source_row["Experimental_species_ID"],
+            source_row["Experiment"],
             exact_by_temp,
             exact_by_mort,
             pairwise,
@@ -354,16 +356,16 @@ def build_rows(
         rows.append(row_from_single(source_row, taxonomy, status, note))
 
     status_order = {
-        "自动合并-唯一互惠exact片段": 0,
-        "独立保留-短片段非唯一": 1,
-        "独立保留-无唯一exact": 2,
-        "独立保留-无跨实验匹配": 3,
+        "auto_merged_unique_reciprocal_exact_fragment": 0,
+        "retained_separately_nonunique_fragment": 1,
+        "retained_separately_no_unique_exact_match": 2,
+        "retained_separately_no_cross_experiment_match": 3,
     }
     rows.sort(
         key=lambda row: (
-            status_order.get(str(row["合并状态"]), 9),
-            str(row["温度注释"] or row["死亡率注释"]).lower(),
-            natural_key(str(row["优先库编号"])),
+            status_order.get(str(row["Merge_status"]), 9),
+            str(row["Temperature_annotation"] or row["Mortality_annotation"]).lower(),
+            natural_key(str(row["Preferred_library_ID"])),
         )
     )
     for index, row in enumerate(rows, start=1):
@@ -429,8 +431,8 @@ def main() -> None:
     summary = pd.DataFrame(rows)
     print(f"Wrote {len(rows)} pairwise-strict units: {tsv_path}")
     print(f"Wrote {len(rows)} pairwise-strict units: {xlsx_path}")
-    print("Status counts:", summary["合并状态"].value_counts().to_dict())
-    print("Original species covered:", int(summary["原始species数"].sum()))
+    print("Status counts:", summary["Merge_status"].value_counts().to_dict())
+    print("Original species covered:", int(summary["Original_species_count"].sum()))
 
 
 if __name__ == "__main__":

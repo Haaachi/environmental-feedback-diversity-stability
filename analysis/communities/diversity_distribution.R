@@ -8,7 +8,7 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_diversity_distribution_fluctuating.R
-# 最简版：震荡群落 Shannon / Gamma Shannon 分布
+# Minimal Shannon / accumulated Shannon distributions for fluctuating communities.
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -72,4 +72,4 @@ for (window in c("early", "full")) {
   cat(sprintf("%s: Shannon n=%d | Gamma n=%d\n", window, nrow(alpha_div), nrow(gamma_div)))
 }
 
-cat("完成\n")
+cat("Done\n")

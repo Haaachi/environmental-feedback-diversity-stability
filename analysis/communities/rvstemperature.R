@@ -8,7 +8,7 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_growth_rate.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -21,7 +21,7 @@ DATA_PATH <- file.path(BASE_DIR, "data", "rK_expfit_skip0.xlsx")
 FIG_DIR   <- file.path(BASE_DIR, "figures", "growth_rate")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
-# ── 参数 ─────────────────────────────────────────────────────
+# Parameters
 FONT_FAMILY <- "Arial"
 FONT_AX     <- 8
 BORDER_SIZE <- 0.25
@@ -41,7 +41,7 @@ COL_TEMP <- c("20°C" = "#85C1E9",
               "30°C" = "#2E6DA4",
               "40°C" = "#C0392B")
 
-# ── 主题（移除Y轴标题占位）───────────────────────────────────
+# Plot theme with no space reserved for a Y-axis title
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX, base_family = FONT_FAMILY) +
     theme(
@@ -64,7 +64,7 @@ theme_pub <- function() {
       axis.text.y  = element_text(size = FONT_AX, color = "black",
                                   margin = margin(r = 3)),
       axis.title.x  = element_blank(),
-      axis.title.y  = element_blank(),  # 👈 彻底清空 Y 轴标题区域
+      axis.title.y  = element_blank(),  # Remove the Y-axis title area completely.
       legend.position  = "none",
       plot.background  = element_rect(fill = "white", color = NA),
       panel.background = element_rect(fill = "white", color = NA),
@@ -72,17 +72,17 @@ theme_pub <- function() {
     )
 }
 
-# ── 显著性检验 ─────────────────────────────────────────────
+# Significance tests
 auto_sig_label <- function(x1, x2) {
   x1 <- x1[!is.na(x1)]; x2 <- x2[!is.na(x2)]
   normal1 <- if (length(x1) >= 3) shapiro.test(x1)$p.value > 0.05 else FALSE
   normal2 <- if (length(x2) >= 3) shapiro.test(x2)$p.value > 0.05 else FALSE
   if (normal1 && normal2) {
     res <- t.test(x1, x2, var.equal = FALSE)
-    cat("  检验方法：Welch t检验\n")
+    cat("  Test: Welch t test\n")
   } else {
     res <- wilcox.test(x1, x2, exact = FALSE)
-    cat("  检验方法：Mann-Whitney U\n")
+    cat("  Test: Mann-Whitney U\n")
   }
   p <- res$p.value
   cat(sprintf("  p = %.4f\n", p))
@@ -114,13 +114,13 @@ add_sig_annotation <- function(plt, label, y_bar, y_top,
              vjust = 0, family = FONT_FAMILY)
 }
 
-# ── 读取数据 ─────────────────────────────────────────────────
+# Read data.
 df_all <- read_excel(DATA_PATH) %>%
   mutate(Temperature = factor(Temperature,
                               levels = c(20, 30, 40),
                               labels = c("20°C", "30°C", "40°C")))
 
-# ── 通用作图函数（固定Y轴上限 1.5，支持多组显著性）───────────
+# Shared plotting function: Y upper limit 1.5, multiple comparisons supported.
 plot_r <- function(df, x_breaks, x_labels, x_limits, w, h, filename,
                    sig_list = NULL) {
   smry <- df %>%
@@ -134,7 +134,7 @@ plot_r <- function(df, x_breaks, x_labels, x_limits, w, h, filename,
   
   jit <- df %>% mutate(x = as.integer(Temperature))
   
-  # ▼▼▼ 固定 Y 轴上限为 1.5 ▼▼▼
+  # Fix the Y upper limit at 1.5.
   y_max <- 1.5
   
   p <- ggplot() +
@@ -157,17 +157,17 @@ plot_r <- function(df, x_breaks, x_labels, x_limits, w, h, filename,
                        expand = expansion(0),
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
     scale_y_continuous(limits = c(0, y_max),
-                       breaks = seq(0, y_max, by = 0.5),  # 显式设置刻度
+                       breaks = seq(0, y_max, by = 0.5),  # Set ticks explicitly.
                        expand = expansion(mult = c(0, 0)),
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
     labs(x = NULL, y = NULL) +
     theme_pub()
   
-  # 循环添加显著性标注（自动垂直错开）
+  # Add significance annotations with automatic vertical offsets.
   if (!is.null(sig_list)) {
     for (i in seq_along(sig_list)) {
       s <- sig_list[[i]]
-      # 高度基于固定 y_max=1.5 计算，避免重叠
+      # Calculate heights from fixed y_max = 1.5 to avoid overlaps.
       y_pos <- y_max * (0.82 + (i - 1) * 0.06)
       p <- add_sig_annotation(p,
                               label  = s$label,
@@ -185,18 +185,18 @@ plot_r <- function(df, x_breaks, x_labels, x_limits, w, h, filename,
   cat(sprintf("-> %s\n", filename))
 }
 
-# ── 预计算所有组间显著性 ────────────────────────────────────
+# Precompute all between-group significance tests.
 r20 <- df_all %>% filter(Temperature == "20°C") %>% pull(r)
 r30 <- df_all %>% filter(Temperature == "30°C") %>% pull(r)
 r40 <- df_all %>% filter(Temperature == "40°C") %>% pull(r)
 
-cat("growth rate 20 vs 30 显著性检验：\n")
+cat("growth rate 20 vs 30 significance test:\n")
 sig_20_30 <- auto_sig_label(r20, r30)
 
-cat("growth rate 30 vs 40 显著性检验：\n")
+cat("growth rate 30 vs 40 significance test:\n")
 sig_30_40 <- auto_sig_label(r30, r40)
 
-# ── 图1：三温度（20 / 30 / 40）+ 双显著性标注 ───────────────
+# Figure 1: three temperatures (20 / 30 / 40), two significance annotations.
 plot_r(df       = df_all,
        x_breaks = c(1, 2, 3),
        x_labels = c("20°C", "30°C", "40°C"),
@@ -208,7 +208,7 @@ plot_r(df       = df_all,
          list(label = sig_30_40, x1 = 2, x2 = 3)
        ))
 
-# ── 图2：两温度（30 / 40）+ 单显著性标注 ─────────────────────
+# Figure 2: two temperatures (30 / 40), one significance annotation.
 df_2t <- df_all %>%
   filter(Temperature %in% c("30°C", "40°C")) %>%
   mutate(Temperature = droplevels(Temperature))
@@ -221,6 +221,6 @@ plot_r(df       = df_2t,
        filename = "growth_rate_r_30v40.pdf",
        sig_list = list(list(label = sig_30_40, x1 = 1, x2 = 2)))
 
-cat("\n完成！figures/growth_rate/\n")
-cat("  growth_rate_r_3temp.pdf   三温度 + 双显著性 (Y轴固定 0-1.5)\n")
-cat("  growth_rate_r_30v40.pdf   30 vs 40 + 显著性 (Y轴固定 0-1.5)\n")
+cat("\nDone!figures/growth_rate/\n")
+cat("  growth_rate_r_3temp.pdf   three temperatures + two comparisons (Y-axis fixed at 0-1.5)\n")
+cat("  growth_rate_r_30v40.pdf   30 versus 40 + significance (Y-axis fixed at 0-1.5)\n")

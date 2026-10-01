@@ -8,13 +8,13 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_biomass.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 群落总biomass随工况变化
-# biomass = 时间窗内每天所有taxon abs_abund之和的均值
-# 折线 + errorbar（SEM）+ 空心点
+# Total community biomass across experimental conditions.
+# Biomass: mean daily sum of all taxon abs_abund within the window.
+# Lines, SEM error bars and hollow points.
 #
-# 输出: figures/biomass/{experiment}/{window}/biomass.pdf
+# Output: figures/biomass/{experiment}/{window}/biomass.pdf
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -28,16 +28,16 @@ PROC_DIR <- file.path(BASE_DIR, "processed")
 FIG_DIR  <- file.path(BASE_DIR, "figures", "biomass")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
-# ── 参数 ─────────────────────────────────────────────────────
+# Parameters
 LAST_DAYS <- list(full = c(8, 9, 10), early = c(4, 5, 6))
 USE_REPS  <- list(full = c(1, 2, 3),  early = c(1))
 
-# 深绿色，区别于fluctuation fraction的蓝色
+# Dark green distinguishes biomass from blue fluctuation fractions.
 LINE_COLOR <- "#2A7F5E"
 LINE_WIDTH <- 0.55
 ERR_LW     <- 0.40
 
-# ── X轴标签 ──────────────────────────────────────────────────
+# X-axis labels
 X_LABELS <- list(
   mortality = c(
     "W1" = expression(10^{-1}),
@@ -55,7 +55,7 @@ X_LABELS <- list(
   )
 )
 
-# ── 图形参数 ─────────────────────────────────────────────────
+# Plot parameters
 FONT_FAMILY <- "Arial"
 FONT_AX     <- 7
 BORDER_SIZE <- 0.25
@@ -65,7 +65,7 @@ TICK_LEN    <- -0.5
 W_PLOT <- 40
 H_PLOT <- 35
 
-# ── 学术主题 ─────────────────────────────────────────────────
+# Publication plot theme
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX, base_family = FONT_FAMILY) +
     theme(
@@ -97,7 +97,7 @@ theme_pub <- function() {
     )
 }
 
-# ── 主循环 ───────────────────────────────────────────────────
+# Main loop
 for (experiment in c("mortality", "temperature")) {
   for (window in c("full", "early")) {
     if (experiment == "temperature" && window == "early") next
@@ -144,20 +144,20 @@ for (experiment in c("mortality", "temperature")) {
         ymax = mean_val + sem_val
       )
     
-    # Y轴
+    # Y-axis
     if (experiment == "temperature") {
       y_upper  <- 1.0
       y_breaks <- c(0, 0.5, 1)
       y_labels <- c("0", "0.5", "1")
     } else {
-      # ⬇️ 修改处：固定 mortality 的 Y 轴
+      # Use fixed Y-axis limits for mortality.
       y_upper  <- 2.0
       y_breaks <- c(0, 1, 2)
       y_labels <- c("0", "1", "2")
     }
     
-    # X轴
-    # ⬇️ 修改处：统一 X 轴只显示 W1, W3, W5
+    # X-axis
+    # Show only W1, W3 and W5 on the X-axis.
     x_breaks     <- c(1, 3, 5)
     x_labels_sub <- X_LABELS[[experiment]][c("W1", "W3", "W5")]
     
@@ -183,7 +183,7 @@ for (experiment in c("mortality", "temperature")) {
         limits   = c(0, y_upper),
         breaks   = y_breaks,
         labels   = y_labels,
-        expand   = expansion(mult = c(0, 0.02)), # 底部留白同样为 0
+        expand   = expansion(mult = c(0, 0.02)), # No padding below zero.
         sec.axis = dup_axis(labels = NULL, name = NULL)
       ) +
       theme_pub()
@@ -200,4 +200,4 @@ for (experiment in c("mortality", "temperature")) {
   }
 }
 
-cat("\n完成！\n")
+cat("\nDone!\n")

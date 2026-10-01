@@ -8,18 +8,18 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_species_temperature.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 图1a：30°C OD时间序列（单菌半透明 + 均值±SEM）
-# 图1b：40°C OD时间序列
-# 图2a：OD_max 统计对比，含个体点 + 自动显著性标注
-# 图2b：log10(CFU_max) 统计对比，含个体点 + 自动显著性标注
-# 图3：系综稳定性 CV
+# Figure 1a: OD trajectories at 30 degrees C, translucent isolates and mean +/- SEM.
+# Figure 1b: OD trajectories at 40 degrees C.
+# Figure 2a: OD_max comparisons with individual points and automatic significance.
+# Figure 2b: log10(CFU_max) comparisons with individual points and significance.
+# Figure 3: ensemble CV.
 #
-# 显著性判断逻辑：
-#   Shapiro-Wilk p > 0.05 → Welch t检验
-#   Shapiro-Wilk p ≤ 0.05 → Mann-Whitney U检验
-# OD背景校正：减去0.035，clip at 0
+# Statistical test selection:
+# Shapiro-Wilk p > 0.05: Welch t test.
+# Shapiro-Wilk p <= 0.05: Mann-Whitney U test.
+# Subtract OD background 0.035 and clip at zero.
 # CFU 0/NA → 1e6 CFU/mL
 # ===========================================================
 
@@ -35,7 +35,7 @@ DATA_PATH <- file.path(BASE_DIR, "data", "Speciestemperature.xlsx")
 FIG_DIR   <- file.path(BASE_DIR, "figures", "species_temperature")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
-# ── 参数 ─────────────────────────────────────────────────────
+# Parameters
 BG       <- 0.035
 CFU_ZERO <- 1e6
 
@@ -63,7 +63,7 @@ JIT_WIDTH   <- 0.08
 ERR_LW      <- 0.45
 ERR_W       <- 0.10
 
-# ── 学术主题 ─────────────────────────────────────────────────
+# Publication plot theme
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX,
                 base_family = FONT_FAMILY) +
@@ -87,7 +87,7 @@ theme_pub <- function() {
       axis.text.y  = element_text(size   = FONT_AX, color = "black",
                                   margin = margin(r = 3)),
       axis.title.x  = element_blank(),
-      axis.title.y  = element_blank(),  # ← 已改为 blank，配合 labs(NULL) 彻底释放空间
+      axis.title.y  = element_blank(),  # Remove the Y-axis title area together with labs(NULL).
       legend.position   = "none",
       plot.background   = element_rect(fill = "white", color = NA),
       panel.background  = element_rect(fill = "white", color = NA),
@@ -95,7 +95,7 @@ theme_pub <- function() {
     )
 }
 
-# ── 自动显著性检验 ────────────────────────────────────────────
+# Automatic statistical test selection
 auto_sig_label <- function(x1, x2) {
   x1 <- x1[!is.na(x1)]; x2 <- x2[!is.na(x2)]
   cat(sprintf("  n = %d vs %d\n", length(x1), length(x2)))
@@ -105,10 +105,10 @@ auto_sig_label <- function(x1, x2) {
   
   if (normal1 && normal2) {
     test_result <- t.test(x1, x2, var.equal = FALSE)
-    cat("  检验方法：Welch t检验\n")
+    cat("  Test: Welch t test\n")
   } else {
     test_result <- wilcox.test(x1, x2, exact = FALSE)
-    cat("  检验方法：Mann-Whitney U\n")
+    cat("  Test: Mann-Whitney U\n")
   }
   
   p <- test_result$p.value
@@ -120,7 +120,7 @@ auto_sig_label <- function(x1, x2) {
   else                "***"
 }
 
-# ── 显著性标注绘图辅助 ───────────────────────────────────────
+# Significance annotation helper
 add_sig_annotation <- function(plt, label, y_bar, y_top,
                                x1 = 1, x2 = 2,
                                tick_h = NULL,
@@ -143,7 +143,7 @@ add_sig_annotation <- function(plt, label, y_bar, y_top,
              vjust = 0, family = FONT_FAMILY)
 }
 
-# ── 读取数据 ─────────────────────────────────────────────────
+# Read data.
 day_cols <- paste0("Day", 1:5)
 
 od30 <- read_excel(DATA_PATH, sheet = "30OD") %>%
@@ -168,7 +168,7 @@ cfu40 <- read_excel(DATA_PATH, sheet = "40CFU") %>%
                 ~{v <- suppressWarnings(as.numeric(.)) * 100
                 if_else(is.na(v) | v == 0, CFU_ZERO, as.numeric(v))}))
 
-# ── 图1：OD时间序列 ──────────────────────────────────────────
+# Figure 1: OD time series
 plot_timeseries <- function(od_df, color) {
   df_long <- od_df %>%
     pivot_longer(all_of(day_cols), names_to = "day", values_to = "OD") %>%
@@ -198,7 +198,7 @@ plot_timeseries <- function(od_df, color) {
     scale_y_continuous(limits = c(0, max(y_br)), breaks = y_br,
                        expand = expansion(mult = c(0, 0)),
                        sec.axis = dup_axis(labels = NULL, name = NULL)) +
-    labs(x = NULL, y = NULL) +   # 👈 已移除坐标轴名称
+    labs(x = NULL, y = NULL) +   # Remove axis titles.
     theme_pub()
 }
 
@@ -210,7 +210,7 @@ ggsave(file.path(FIG_DIR, "OD_timeseries_40.pdf"), p1b,
        width = W_TS, height = H_TS, units = "mm", device = cairo_pdf)
 cat("-> OD_timeseries_30/40.pdf\n")
 
-# ── 图2a：OD_max 统计对比 ────────────────────────────────────
+# Figure 2a: OD_max comparisons
 odmax30 <- od30 %>% rowwise() %>%
   mutate(v = max(c_across(all_of(day_cols)), na.rm = TRUE)) %>% pull(v)
 odmax40 <- od40 %>% rowwise() %>%
@@ -229,10 +229,10 @@ jit_od <- bind_rows(
   tibble(x = 2, val = odmax40, temp = "40°C")
 ) %>% mutate(temp = factor(temp, levels = c("30°C", "40°C")))
 
-cat("OD_max 显著性检验：\n")
+cat("OD_max significance test:\n")
 sig_od <- auto_sig_label(odmax30, odmax40)
-cat(sprintf("  标注：%s\n", sig_od))
-cat(sprintf("  均值  30: %.3f±%.3f  40: %.3f±%.3f\n",
+cat(sprintf("  Annotation:%s\n", sig_od))
+cat(sprintf("  Means  30: %.3f±%.3f  40: %.3f±%.3f\n",
             stat_od$mu[1], stat_od$sem[1],
             stat_od$mu[2], stat_od$sem[2]))
 
@@ -259,7 +259,7 @@ p2a <- ggplot() +
     expand = expansion(mult = c(0, 0)),
     sec.axis = dup_axis(labels = NULL, name = NULL)
   ) +
-  labs(x = NULL, y = NULL) +   # 👈 已移除坐标轴名称
+  labs(x = NULL, y = NULL) +   # Remove axis titles.
   theme_pub()
 
 p2a <- add_sig_annotation(p2a, sig_od, y_bar = od_y_bar, y_top = od_y_top)
@@ -268,7 +268,7 @@ ggsave(file.path(FIG_DIR, "stat_OD.pdf"), p2a,
        width = W_ST, height = H_ST, units = "mm", device = cairo_pdf)
 cat("-> stat_OD.pdf\n")
 
-# ── 图2b：log10(CFU_max) 统计对比 ───────────────────────────
+# Figure 2b: log10(CFU_max) comparisons
 log_cfumax30 <- cfu30 %>% rowwise() %>%
   mutate(v = log10(max(c_across(c("Day3","Day4","Day5")), na.rm = TRUE))) %>%
   pull(v)
@@ -289,9 +289,9 @@ jit_cfu <- bind_rows(
   tibble(x = 2, val = log_cfumax40, temp = "40°C")
 ) %>% mutate(temp = factor(temp, levels = c("30°C", "40°C")))
 
-cat("CFU_max 显著性检验：\n")
+cat("CFU_max significance test:\n")
 sig_cfu <- auto_sig_label(log_cfumax30, log_cfumax40)
-cat(sprintf("  标注：%s\n", sig_cfu))
+cat(sprintf("  Annotation:%s\n", sig_cfu))
 cat(sprintf("  logCFU  30: %.2f±%.2f  40: %.2f±%.2f\n",
             stat_cfu$mu[1], stat_cfu$sem[1],
             stat_cfu$mu[2], stat_cfu$sem[2]))
@@ -317,12 +317,12 @@ p2b <- ggplot() +
                      limits = c(0.6, 2.4), expand = expansion(0)) +
   scale_y_continuous(
     limits = c(cfu_lo, cfu_hi),
-    breaks = seq(6, cfu_hi, by = 1),  # 已修正原代码的 seq(-6, ...) 笔误
+    breaks = seq(6, cfu_hi, by = 1),  # Use positive CFU ticks; fixes an earlier seq(-6, ...) typo.
     labels = function(x) parse(text = paste0("10^", x)),
     expand = expansion(mult = c(0, 0)),
     sec.axis = dup_axis(labels = NULL, name = NULL)
   ) +
-  labs(x = NULL, y = NULL) +   # 👈 已移除坐标轴名称
+  labs(x = NULL, y = NULL) +   # Remove axis titles.
   theme_pub()
 
 p2b <- add_sig_annotation(p2b, sig_cfu,
@@ -333,7 +333,7 @@ ggsave(file.path(FIG_DIR, "stat_CFU.pdf"), p2b,
        width = W_ST, height = H_ST, units = "mm", device = cairo_pdf)
 cat("-> stat_CFU.pdf\n")
 
-# ── 图3：系综CV ──────────────────────────────────────────────
+# Figure 3: ensemble CV
 calc_cv <- function(od_df) {
   std_i  <- od_df %>% rowwise() %>%
     mutate(s = sd(c_across(all_of(day_cols)), na.rm = TRUE)) %>% pull(s)
@@ -344,8 +344,8 @@ calc_cv <- function(od_df) {
 
 cv30 <- calc_cv(od30)
 cv40 <- calc_cv(od40)
-cat(sprintf("系综CV 30°C: %.4f\n", cv30))
-cat(sprintf("系综CV 40°C: %.4f\n", cv40))
+cat(sprintf("Ensemble CV 30°C: %.4f\n", cv30))
+cat(sprintf("Ensemble CV 40°C: %.4f\n", cv40))
 
 cv_df <- tibble(
   temp = factor(c("30°C", "40°C"), levels = c("30°C", "40°C")),
@@ -363,16 +363,16 @@ p3 <- ggplot(cv_df, aes(x = x, y = cv)) +
   scale_y_continuous(limits = c(0, max(y_br_cv)), breaks = y_br_cv,
                      expand = expansion(mult = c(0, 0)),
                      sec.axis = dup_axis(labels = NULL, name = NULL)) +
-  labs(x = NULL, y = NULL) +   # 👈 已移除坐标轴名称
+  labs(x = NULL, y = NULL) +   # Remove axis titles.
   theme_pub()
 
 ggsave(file.path(FIG_DIR, "ensemble_cv.pdf"), p3,
        width = W_CV, height = H_CV, units = "mm", device = cairo_pdf)
 cat("-> ensemble_cv.pdf\n")
 
-cat("\n完成！figures/species_temperature/\n")
+cat("\nDone!figures/species_temperature/\n")
 cat("  OD_timeseries_30.pdf\n")
 cat("  OD_timeseries_40.pdf\n")
-cat("  stat_OD.pdf   个体点+均值±SEM+自动显著性标注 (无轴标签)\n")
-cat("  stat_CFU.pdf  个体点+均值±SEM+自动显著性标注 (无轴标签)\n")
+cat("  stat_OD.pdf   individual points + mean +/- SEM + automatic significance (no axis titles)\n")
+cat("  stat_CFU.pdf  individual points + mean +/- SEM + automatic significance (no axis titles)\n")
 cat("  ensemble_cv.pdf\n")

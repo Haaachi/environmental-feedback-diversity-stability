@@ -1,48 +1,36 @@
 """
-compute_diversity.py
-====================
-计算每个 experiment × condition × community × replica 的多样性指标
+Compute diversity for each experiment x condition x community x replicate.
 
-taxon存活判定：rel_abund > REL_THRESHOLD (1%)
-群落存活判定：时间窗内每天 total abs_abund 均值 >= COLLAPSE_THRESHOLD (0.05)
+Taxon presence: rel_abund > REL_THRESHOLD (1%).
+Community persistence: mean daily total abs_abund >= COLLAPSE_THRESHOLD (0.05).
 
-保留指标（两套，last_day 和 window_pooled）：
-  1. richness           — 存活taxon数（rel_abund > 1% 的物种数）
-  2. survival_fraction  — richness / theoretical_n（从Excel header读取）
-  3. shannon            — Shannon H，基于真实 rel_abund 分布（不重归一化）
-  4. simpson            — 1 - Σpᵢ²
-  5. evenness           — H / ln(S)，S 为 richness（>1%的存活物种数）
+Metrics for endpoint and pooled windows:
+1. richness: number of taxa exceeding 1% relative abundance.
+2. survival_fraction: richness / theoretical_n, read from the Excel header.
+3. shannon: Shannon H from the full abundance distribution.
+4. simpson: 1 - sum(p_i ** 2).
+5. evenness: H / ln(richness).
 
-last_day（→ alpha_diversity.csv）：
-  基于 last_day 单天
-  - richness: 该天 rel_abund > 1% 的 taxon 数
-  - shannon/simpson: 该天**所有 taxon** 的 rel_abund 归一化后计算
-    （不丢 < 1% 的，不在存活子集内部重新归一化）
-  - evenness: shannon / ln(richness)
+Endpoint (alpha_diversity.csv):
+- Richness uses the last-day presence rule.
+- Shannon/Simpson normalize all taxa on that day, including taxa below 1%.
+  They do not renormalize within the present subset.
+- Evenness is shannon / ln(richness).
 
-window_pooled（→ gamma_diversity.csv）：
-  abs pooling：窗内各天 abs_abund 按 taxon 加总
-  - richness: 窗内任意一天 rel_abund > 1% 的 taxon 数
-  - shannon/simpson: **所有 taxon** 的 pooled abs 归一化后计算
-    （不丢窗内从未 >1% 的 taxon）
-  - evenness: gamma_shannon / ln(gamma_richness)
-  列名加 gamma_ 前缀
+Pooled window (gamma_diversity.csv):
+- Sum each taxon's absolute abundance across the analysis window.
+- Richness counts taxa above 1% on any included day.
+- Shannon/Simpson normalize pooled abundance across all taxa, including taxa
+  that never exceed 1%. Evenness is gamma_shannon / ln(gamma_richness).
+- Pooled metric column names have a gamma_ prefix.
 
-设计理由（核心变更）：
-  原版把 "richness 阈值过滤" 和 "概率分布构造" 耦合在一起，
-  导致 Shannon/Simpson 仅基于存活子集内部重归一化，
-  系统性低估了真实多样性（"差点存活"的 taxon 完全消失）。
-  这版解耦：阈值只用于 richness/evenness 分母，
-  shannon/simpson 用真实完整分布。
+Presence filtering is separate from probability-distribution construction.
+Earlier subset-only normalization underestimated diversity by dropping
+low-abundance taxa. The threshold now affects richness and the evenness
+normalizer; Shannon/Simpson use the full distribution.
 
-输出：
-  processed/diversity/
-  ├── full/
-  │   ├── alpha_diversity.csv
-  │   └── gamma_diversity.csv
-  └── early/
-      ├── alpha_diversity.csv
-      └── gamma_diversity.csv
+Outputs: processed/diversity/{full,early}/, including alpha_diversity.csv,
+gamma_diversity.csv and mean_daily_diversity.csv.
 """
 
 import os
@@ -55,9 +43,9 @@ BASE_DIR = os.environ.get("COMMUNITY_WORKSPACE", os.path.dirname(os.path.abspath
 PROC_DIR = os.path.join(BASE_DIR, "processed")
 OUT_DIR  = os.path.join(PROC_DIR, "diversity")
 
-# ── 参数 ─────────────────────────────────────────────────────
-REL_THRESHOLD      = 1      # taxon存活：rel_abund > 1%
-COLLAPSE_THRESHOLD = 0.05   # 群落存活：mean total abs_abund >= 此值
+# Parameters
+REL_THRESHOLD      = 1      # Taxon presence: rel_abund > 1%.
+COLLAPSE_THRESHOLD = 0.05   # Community persistence: mean total abs_abund >= this value.
 
 WINDOWS = {
     "full": {
@@ -92,7 +80,7 @@ def include_community(experiment, condition, community):
     return True
 
 
-# ── 理论物种数（从Excel Community header中读取 n=XX）────────
+# Initial species count: read n=XX from the Excel Community header.
 def get_theoretical_n(path):
     wb   = openpyxl.load_workbook(path)
     ws   = wb[wb.sheetnames[0]]
@@ -107,7 +95,7 @@ def get_theoretical_n(path):
     return theo
 
 
-# ── 群落存活判定 ──────────────────────────────────────────────
+# Community persistence check
 def is_community_alive(df_rep):
     mean_total_abs = df_rep.groupby("day")["abs_abund"].sum().mean()
     if pd.isna(mean_total_abs):
@@ -140,14 +128,14 @@ def valid_days_by_od(df_window):
     return totals
 
 
-# ── 多样性核心计算（解耦 richness 阈值 与 分布构造）──────────
+# Diversity calculations with separate presence and distribution rules
 def _shannon_simpson(p):
     """
-    给定一个已归一化的概率向量 p（Σp=1, 元素含 0 合法），
-    返回 shannon 和 simpson。
+    Return Shannon and Simpson diversity from a normalized probability vector p.
+    Zero probabilities are valid; sum(p) = 1.
     """
     p = np.asarray(p, dtype=float)
-    p_nz = p[p > 0]                   # ln(0) 按惯例 0·ln 0 = 0
+    p_nz = p[p > 0]                   # Exclude zeros from the logarithm; the conventional value of 0 * ln(0) is zero.
     shannon = float(-np.sum(p_nz * np.log(p_nz))) if len(p_nz) > 0 else 0.0
     simpson = float(1.0 - np.sum(p ** 2))
     return shannon, simpson
@@ -155,27 +143,25 @@ def _shannon_simpson(p):
 
 def calc_diversity(weights_all, alive_mask, theoretical_n):
     """
-    通用 diversity 计算（alpha / gamma 共用）。
+    Shared alpha/gamma diversity calculation.
 
-    参数
-    ----
+    Parameters
+    ----------
     weights_all : 1D array
-        所有 taxon 的丰度权重（alpha: 当天 rel_abund，
-        gamma: pooled abs_abund）。可含 0。
-    alive_mask : 1D bool array, 同长度
-        哪些 taxon 算"存活"（用于 richness 计数）。
-    theoretical_n : int / float
-        初始理论物种数，用于 survival_fraction。
+        All taxon abundance weights: daily rel_abund for alpha, pooled abs_abund
+        for gamma. Zero weights are allowed.
+    alive_mask : 1D bool array of the same length
+        Taxa counted as present for richness.
+    theoretical_n : int or float
+        Initial species count used for survival_fraction.
 
-    返回
-    ----
-    dict with: richness, survival_fraction, shannon, simpson, evenness
+    Returns
+    -------
+    dict
+        Richness, survival fraction, Shannon, Simpson and evenness.
 
-    设计要点
-    --------
-    - richness  = sum(alive_mask)                       (阈值过滤)
-    - shannon/simpson 用全部 weights_all 归一化后的分布   (不阈值过滤)
-    - evenness  = shannon / ln(richness)                (S = richness)
+    Richness is sum(alive_mask). Shannon/Simpson normalize all weights and do
+    not apply the presence threshold to the probability distribution.
     """
     weights_all = np.asarray(weights_all, dtype=float)
     alive_mask  = np.asarray(alive_mask,  dtype=bool)
@@ -188,11 +174,11 @@ def calc_diversity(weights_all, alive_mask, theoretical_n):
                     shannon=0.0, effective_shannon=0.0,
                     simpson=0.0, evenness=0.0)
 
-    # 真实分布，不丢任何 taxon
+    # Use the full distribution without dropping taxa.
     p = weights_all / total
     shannon, simpson = _shannon_simpson(p)
 
-    # evenness 分母用 richness（存活物种数）
+    # Use richness, the number of present species, in the evenness denominator.
     evenness = float(shannon / np.log(s)) if s > 1 else 0.0
 
     surv = (round(s / theoretical_n, 4)
@@ -209,7 +195,7 @@ def calc_diversity(weights_all, alive_mask, theoretical_n):
     )
 
 
-# ── collapsed 群落的空记录模板 ────────────────────────────────
+# Empty record template for collapsed communities
 DIVERSITY_COLS = ["richness", "survival_fraction",
                   "shannon", "effective_shannon", "simpson", "evenness"]
 
@@ -222,7 +208,7 @@ def collapsed_record(base, theoretical_n, mean_total_abs, prefix=""):
             "collapsed":      True}
 
 
-# ── 主流程 ────────────────────────────────────────────────────
+# Main workflow
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
 
@@ -262,7 +248,7 @@ def main():
                         base = dict(experiment=experiment, condition=cond,
                                     community=comm, replica=rep)
 
-                        # 群落存活用时间窗判定
+                        # Evaluate community persistence over the analysis window.
                         df_window = df_comm[
                             (df_comm["replica"] == rep) &
                             (df_comm["day"].isin(gamma_days))
@@ -279,7 +265,7 @@ def main():
                         )
                         n_valid_days = len(valid_days)
 
-                        # ══ Alpha：last_day 单天 ══════════════
+                        # Alpha diversity: endpoint day.
                         df_rd = df_comm[
                             (df_comm["replica"] == rep) &
                             (df_comm["day"]     == last_day)
@@ -292,7 +278,7 @@ def main():
                                     {**base, "day": last_day},
                                     t_n, alpha_day_total_abs, prefix=""))
                         else:
-                            # 所有 taxon 的 rel_abund，存活 mask 用 >1%
+                            # Use all relative abundances; the presence mask uses >1%.
                             rel_vals   = df_rd["rel_abund"].values
                             alive_mask = rel_vals > REL_THRESHOLD
 
@@ -362,14 +348,14 @@ def main():
                                     {**base, "days": str(gamma_days)},
                                     t_n, mean_total_abs, prefix="gamma_"))
                         else:
-                            # 每个 taxon 在窗内各天 abs_abund 加总（所有 taxon，不筛）
+                            # Sum each taxon's abs_abund over the window, including all taxa.
                             pooled_abs = (
                                 df_window_valid.groupby("taxon")["abs_abund"]
                                 .sum()
                                 .sort_index()
                             )
 
-                            # 存活判定：窗内**任意一天** rel_abund > 1% 的 taxon
+                            # Presence: rel_abund > 1% on any included day.
                             alive_taxa = set(
                                 df_window_valid.loc[
                                     df_window_valid["rel_abund"] > REL_THRESHOLD,
@@ -393,7 +379,7 @@ def main():
                                 "collapsed":      False,
                             })
 
-        # ── 保存 ─────────────────────────────────────────────
+        # Save outputs.
         out_subdir = os.path.join(OUT_DIR, window_name)
         os.makedirs(out_subdir, exist_ok=True)
 
@@ -404,17 +390,17 @@ def main():
         pd.DataFrame(mean_daily_records).to_csv(
             os.path.join(out_subdir, "mean_daily_diversity.csv"), index=False)
 
-        print(f"  alpha (last_day={last_day}):    {len(alpha_records)} 行")
-        print(f"  gamma (pooled {gamma_days}): {len(gamma_records)} 行")
-        print(f"  mean daily ({gamma_days}):   {len(mean_daily_records)} 行")
+        print(f"  alpha (last_day={last_day}):    {len(alpha_records)} rows")
+        print(f"  gamma (pooled {gamma_days}): {len(gamma_records)} rows")
+        print(f"  mean daily ({gamma_days}):   {len(mean_daily_records)} rows")
 
-    print(f"\n完成！输出目录: {OUT_DIR}")
-    print(f"  taxon 存活:     rel_abund > {REL_THRESHOLD}%")
-    print(f"  群落存活:       mean_total_abs >= {COLLAPSE_THRESHOLD}")
-    print(f"  Richness:       存活 taxon 数（阈值 {REL_THRESHOLD}%）")
-    print(f"  Shannon/Simpson: 全部 taxon 真实分布（不重归一化）")
-    print(f"  Evenness 分母:  ln(richness)")
-    print(f"  Gamma pooling:  abs_abund 加和（biomass-weighted）")
+    print(f"\nDone! Output directory: {OUT_DIR}")
+    print(f"  Taxon presence:     rel_abund > {REL_THRESHOLD}%")
+    print(f"  Community persistence:       mean_total_abs >= {COLLAPSE_THRESHOLD}")
+    print(f"  Richness:       number of present taxa (threshold {REL_THRESHOLD}%)")
+    print(f"  Shannon/Simpson: full taxon distribution (no present-subset renormalization)")
+    print(f"  Evenness denominator:  ln(richness)")
+    print(f"  Gamma pooling:  summed abs_abund (biomass-weighted)")
 
 
 if __name__ == "__main__":

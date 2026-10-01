@@ -8,22 +8,22 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_diversity_flucstable_clean.R
-# 功能：
-# 1. 绘制 α, γ, β 多样性的稳定 vs 震荡双曲线（无散点）
-# 2. 每个条件标注稳定 vs 震荡 Wilcoxon 检验的彩色星号
-# 3. 震荡群落组间比较（bracket + 星号）：
-#    - 温度：30 vs 10, 30 vs 40
+# Purpose:
+# 1. Plot stable/fluctuating alpha, gamma and beta diversity curves without raw points.
+# 2. Show colored stars for within-condition Wilcoxon comparisons.
+# 3. Compare fluctuating communities across conditions using brackets and stars:
+# Temperature: 30 versus 10 and 30 versus 40.
 #    - mortality：W3 vs W1, W3 vs W5
-# 4. 图上不显示稳定群落的 Kruskal-Wallis 结果
-# 5. 额外计算所有比较的 Student's t 检验 + 已有的 Mann-Whitney，
-#    以及稳定群落的 Kruskal-Wallis，结果保存为 CSV
+# 4. Omit stable-group Kruskal-Wallis results from the figure.
+# 5. Also compute Student's t tests alongside Mann-Whitney tests,
+# and stable-group Kruskal-Wallis tests; save results to CSV.
 #
-# 修复说明：
-#   - 添加 ensure_collapsed_col()
-#   - 所有使用 collapsed 前均保证 collapsed 列存在
-#   - temperature W5 中 richness == 0 的 collapsed 群落优先排除
-#   - collapsed 排除逻辑必须放在 species-instability 判据之前
-#     否则 collapsed 群落会被误判为 fluctuating
+# Implementation notes:
+# Add ensure_collapsed_col().
+# Ensure the collapsed column exists before using it.
+# Exclude collapsed temperature W5 communities with richness == 0 first.
+# Apply collapse exclusions before the species-instability criterion,
+# to avoid incorrectly labeling collapsed communities as fluctuating.
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -61,7 +61,7 @@ MEAN_SIZE      <- 1.8
 SIG_TEXT_SIZE  <- 3.0
 
 # ============================================================
-# Experiment - Window 组合约束
+# Allowed experiment-window combinations
 # ============================================================
 
 EXP_WINDOW_MAP <- list(
@@ -75,7 +75,7 @@ is_valid_combo <- function(experiment, window) {
 }
 
 # ============================================================
-# collapsed 列鲁棒性工具函数
+# Helper for a missing collapsed column
 # ============================================================
 
 ensure_collapsed_col <- function(df) {
@@ -90,7 +90,7 @@ ensure_collapsed_col <- function(df) {
 }
 
 # ============================================================
-# X轴标签
+# X-axis labels
 # ============================================================
 
 X_LABELS <- list(
@@ -138,7 +138,7 @@ MEAN_DAILY_METRICS <- list(
 )
 
 # ============================================================
-# 主题
+# Plot theme
 # ============================================================
 
 theme_pub <- function() {
@@ -186,7 +186,7 @@ theme_pub <- function() {
 }
 
 # ============================================================
-# 绘图函数
+# Plotting function
 # ============================================================
 
 plot_flucstable_metric <- function(df_metric, cv_df,
@@ -196,7 +196,7 @@ plot_flucstable_metric <- function(df_metric, cv_df,
   
   x_labs <- X_LABELS[[experiment]]
   
-  # 保证 collapsed 列存在
+  # Ensure the collapsed column exists.
   cv_df <- ensure_collapsed_col(cv_df)
   
   join_keys <- intersect(
@@ -224,8 +224,8 @@ plot_flucstable_metric <- function(df_metric, cv_df,
         is.na(community_cv)                          ~ "no_data",
         collapsed == TRUE                             ~ "stable",
         
-        # 硬性排除：
-        # temperature W5 只保留 community 3, 7, 12
+        # Mandatory exclusion:
+        # For temperature W5, retain communities 3, 7 and 12 only.
         experiment == "temperature" &
           condition == "W5" &
           !community %in% c(3, 7, 12) ~ "no_data",
@@ -273,7 +273,7 @@ plot_flucstable_metric <- function(df_metric, cv_df,
   }
   
   # ------------------------------------------------------------
-  # 稳定 vs 震荡：每个条件 Wilcoxon 检验
+  # Within-condition stable/fluctuating Wilcoxon comparisons
   # ------------------------------------------------------------
   
   star_data <- data.frame()
@@ -349,7 +349,7 @@ plot_flucstable_metric <- function(df_metric, cv_df,
   }
   
   # ------------------------------------------------------------
-  # 基础图形
+  # Base plot
   # ------------------------------------------------------------
   
   p <- ggplot() +
@@ -425,7 +425,7 @@ plot_flucstable_metric <- function(df_metric, cv_df,
   }
   
   # ------------------------------------------------------------
-  # 震荡群落组间 bracket
+  # Between-condition brackets for fluctuating communities
   # ------------------------------------------------------------
   
   if (add_fluct_bracket) {
@@ -662,12 +662,12 @@ plot_flucstable_metric <- function(df_metric, cv_df,
 }
 
 # ============================================================
-# 额外统计计算函数
+# Additional statistical calculations
 # ============================================================
 
 compute_and_save_stats <- function(df_joined, metric_col, experiment, stat_dir, metric_name) {
   
-  # 1. 每个条件：稳定 vs 震荡
+  # 1. Within each condition: stable versus fluctuating.
   conditions <- unique(df_joined$condition)
   all_res <- list()
   
@@ -714,7 +714,7 @@ compute_and_save_stats <- function(df_joined, metric_col, experiment, stat_dir, 
     )
   }
   
-  # 2. 震荡群落特定组间比较
+  # 2. Selected between-condition comparisons for fluctuating communities.
   if (experiment == "temperature") {
     fluct_data <- df_joined %>%
       filter(
@@ -794,7 +794,7 @@ compute_and_save_stats <- function(df_joined, metric_col, experiment, stat_dir, 
     }
   }
   
-  # 3. 稳定群落 Kruskal-Wallis
+  # 3. Kruskal-Wallis tests for stable communities.
   if (experiment == "temperature") {
     stable_data <- df_joined %>%
       filter(
@@ -842,7 +842,7 @@ compute_and_save_stats <- function(df_joined, metric_col, experiment, stat_dir, 
 }
 
 # ============================================================
-# 主循环
+# Main loop
 # ============================================================
 
 for (experiment in c("mortality", "temperature")) {
@@ -850,7 +850,7 @@ for (experiment in c("mortality", "temperature")) {
     
     if (!is_valid_combo(experiment, window)) {
       cat(sprintf(
-        "\n[skip] %s × %s（非合法组合，见 EXP_WINDOW_MAP）\n",
+        "\n[skip] %s × %s (unsupported combination; see EXP_WINDOW_MAP)\n",
         experiment,
         window
       ))
@@ -867,7 +867,7 @@ for (experiment in c("mortality", "temperature")) {
     )
     
     if (!file.exists(fluc_path)) {
-      cat("  [跳过] fluctuations 数据不存在\n")
+      cat("  [skip] fluctuations data missing\n")
       next
     }
     
@@ -878,9 +878,9 @@ for (experiment in c("mortality", "temperature")) {
       ensure_collapsed_col()
     
     # ------------------------------------------------------------
-    # 推断 collapsed 标记
-    # richness == 0 视为 collapsed
-    # 如果 alpha 文件不存在，则全部 collapsed = FALSE
+    # Infer collapse flags.
+    # Treat richness == 0 as collapsed.
+    # If the alpha file is missing, set collapsed = FALSE for all rows.
     # ------------------------------------------------------------
     
     alpha_path_for_collapse <- file.path(
@@ -961,7 +961,7 @@ for (experiment in c("mortality", "temperature")) {
           device = cairo_pdf
         )
         
-        cat(sprintf("  -> 图: %s_flucstable.pdf\n", metric))
+        cat(sprintf("  -> Figure: %s_flucstable.pdf\n", metric))
         
         df_joined <- attr(p, "joined_data")
         
@@ -1017,7 +1017,7 @@ for (experiment in c("mortality", "temperature")) {
           device = cairo_pdf
         )
         
-        cat(sprintf("  -> 图: %s_flucstable.pdf\n", metric))
+        cat(sprintf("  -> Figure: %s_flucstable.pdf\n", metric))
         
         df_joined <- attr(p, "joined_data")
         
@@ -1069,7 +1069,7 @@ for (experiment in c("mortality", "temperature")) {
           device = cairo_pdf
         )
 
-        cat(sprintf("  -> 图: %s_flucstable.pdf\n", metric))
+        cat(sprintf("  -> Figure: %s_flucstable.pdf\n", metric))
 
         df_joined <- attr(p, "joined_data")
 
@@ -1122,7 +1122,7 @@ for (experiment in c("mortality", "temperature")) {
             device = cairo_pdf
           )
           
-          cat("  -> 图: beta_within_flucstable.pdf\n")
+          cat("  -> Figure: beta_within_flucstable.pdf\n")
           
           df_joined <- attr(p, "joined_data")
           
@@ -1175,7 +1175,7 @@ for (experiment in c("mortality", "temperature")) {
           device = cairo_pdf
         )
         
-        cat("  -> 图: beta_across_flucstable.pdf\n")
+        cat("  -> Figure: beta_across_flucstable.pdf\n")
         
         df_joined <- attr(p, "joined_data")
         
@@ -1193,10 +1193,10 @@ for (experiment in c("mortality", "temperature")) {
   }
 }
 
-cat("\n===== 完成！=====\n")
-cat("图形已保存，图上仅显示稳定 vs 震荡的彩色星号及震荡群落组间 bracket。\n")
-cat("所有统计检验结果（Wilcoxon, t-test, Kruskal-Wallis）已保存至 stats 子目录。\n")
-cat("\nExperiment - Window 约束：\n")
+cat("\n===== Done!=====\n")
+cat("Figures saved; annotations show within-condition stable/fluctuating stars and between-condition fluctuating-group brackets.\n")
+cat("All statistical results (Wilcoxon, t-test, Kruskal-Wallis) saved in the stats subdirectory.\n")
+cat("\nExperiment - Window constraints:\n")
 
 for (exp_name in names(EXP_WINDOW_MAP)) {
   cat(sprintf(

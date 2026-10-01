@@ -8,20 +8,20 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_fluctuation_proportion.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 对震荡指标绘制两类图：
-#   图A：震荡比例图（indicator >= threshold → 震荡）
-#   图B：指标系综均值图（mean ± SEM，跨群落）
+# Generate two types of plots for each instability metric:
+# A: fluctuation proportion, using indicator >= threshold.
+# B: ensemble mean of the metric across communities, with SEM.
 #
-# 判据阈值在顶部 THRESHOLDS 统一调整
-# 分母使用每个 experiment x window x condition 的实际观测数
-# 误差棒：SEM（二项分布用于比例图，普通SEM用于均值图）
+# Adjust operational boundaries in THRESHOLDS at the top of the script.
+# Use observed sample counts per experiment, window and condition as denominators.
+# Error bars: binomial SEM for proportions; ordinary SEM for means.
 #
-# 输出: figures/fluctuation_proportion/
+# Output: figures/fluctuation_proportion/
 #   <metric>/
-#     {experiment}_{window}_proportion.pdf   ← 震荡比例
-#     {experiment}_{window}_mean.pdf         ← 指标均值
+# {experiment}_{window}_proportion.pdf: fluctuation proportions.
+# {experiment}_{window}_mean.pdf: metric means.
 #   oscillating_communities/
 #     {metric}_{experiment}_{window}_oscillating.csv
 # ===========================================================
@@ -42,7 +42,7 @@ dir.create(OSC_DIR, showWarnings = FALSE, recursive = TRUE)
 dir.create(STAT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # ============================================================
-# ── 阈值设置（在此处手动调整）───────────────────────────────
+# Operational thresholds; adjust here.
 # ============================================================
 THRESHOLDS <- list(
   community_cv = 0.265
@@ -71,8 +71,8 @@ KEY_CONTRASTS <- list(
   )
 )
 
-# ── 分母：每个 experiment × window 的总群落数 ────────────────
-# ── X轴标签 ──────────────────────────────────────────────────
+# Denominators: total communities per experiment and window
+# X-axis labels
 X_LABELS <- list(
   mortality = c(
     "W1" = expression(10^{1}),
@@ -90,7 +90,7 @@ X_LABELS <- list(
   )
 )
 
-# ── 图形参数 ─────────────────────────────────────────────────
+# Plot parameters
 FONT_FAMILY <- "Arial"
 FONT_AX     <- 10
 BORDER_SIZE <- 0.25
@@ -113,7 +113,7 @@ KEY_MEAN_CONTRASTS <- list(
   temperature = list(c("W3", "W2"), c("W3", "W1"))
 )
 
-# ── 学术主题（与原版完全一致）────────────────────────────────
+# Publication plot theme, preserved from the source
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX, base_family = FONT_FAMILY) +
     theme(
@@ -145,7 +145,7 @@ theme_pub <- function() {
     )
 }
 
-# ── 通用X轴 scale（两类图共用）───────────────────────────────
+# Shared X-axis scale for both plot types
 scale_x_condition <- function(experiment) {
   scale_x_continuous(
     breaks   = 1:5,
@@ -381,7 +381,7 @@ plot_metric_mean <- function(df, summary_mean, metric, experiment, window,
 }
 
 # ============================================================
-# 主循环：指标 × 实验 × 窗口
+# Main loop: metrics x experiments x windows
 # ============================================================
 all_prop_tests <- list()
 
@@ -414,7 +414,7 @@ for (metric in names(THRESHOLDS)) {
       
       cat(sprintf("\n  --- %s / %s ---\n", experiment, window))
       
-      # ── 震荡群落编号输出 ──────────────────────────────────
+      # Export IDs of fluctuating communities.
       osc_df <- df %>%
         filter(.data[[metric]] >= threshold) %>%
         arrange(condition, community, replica) %>%
@@ -427,15 +427,15 @@ for (metric in names(THRESHOLDS)) {
         sprintf("%s_%s_%s_oscillating.csv", metric, experiment, window)
       )
       write_csv(osc_df, osc_path)
-      cat(sprintf("  震荡群落: %d / %d\n", nrow(osc_df), nrow(df)))
+      cat(sprintf("  Fluctuating communities: %d / %d\n", nrow(osc_df), nrow(df)))
       
       # x_pos：W1→1, W2→2, ...
       df <- df %>%
         mutate(x_pos = as.integer(sub("W", "", condition)))
       
       # ======================================================
-      # 图A：震荡比例图
-      # 分母 n_obs 含 collapsed（collapsed 在 df 中 cv=0，不超阈值）
+      # Plot A: fluctuation proportion
+      # n_obs includes collapsed communities, whose CV is zero and below the boundary.
       # ======================================================
       summary_prop <- df %>%
         group_by(condition, x_pos) %>%
@@ -504,9 +504,9 @@ for (metric in names(THRESHOLDS)) {
       }
       
       # ======================================================
-      # 图B：指标系综均值图（mean ± SEM）
-      # collapsed 群落指标已在Python中置0，纳入平均
-      # 避免50°C等高collapse条件下均值异常偏大
+      # Plot B: ensemble metric mean +/- SEM
+      # Include collapsed-community metrics, set to zero by Python, in the average.
+      # This avoids inflating means in collapse-heavy conditions such as 50 degrees C.
       # ======================================================
       summary_mean <- df %>%
         group_by(condition, x_pos) %>%
@@ -522,7 +522,7 @@ for (metric in names(THRESHOLDS)) {
         ) %>%
         arrange(x_pos)
       
-      # Y轴：基于本实验×窗口数据自适应，上限留10%空白
+      # Adapt Y limits to this experiment/window, leaving 10% padding above.
       y_max_m  <- max(summary_mean$ymax, na.rm = TRUE)
       y_upper_m <- ceiling(y_max_m * 1.18 * 10) / 10
       y_upper_m <- max(y_upper_m, threshold * 1.5)
@@ -658,7 +658,7 @@ for (metric in MEAN_ONLY_METRICS) {
   }
 }
 
-cat("\n完成！\n")
+cat("\nDone!\n")
 cat("figures/fluctuation_proportion/\n")
 for (metric in names(THRESHOLDS)) {
   cat(sprintf("  %s/  (threshold=%.2f)\n", metric, THRESHOLDS[[metric]]))

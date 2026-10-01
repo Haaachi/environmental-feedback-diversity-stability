@@ -8,37 +8,37 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_abundance.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 统一输出所有丰度堆叠柱状图：
+# Generate all abundance stacked-bar plots:
 #   abs_full              abs_abund, D1-10,  R1
 #   abs_early             abs_abund, D1-6,   R1
 #   rel_full              rel_abund, D1-10,  R1
 #   rel_early             rel_abund, D1-6,   R1
-#   abs_last3_replicates  abs_abund, D8-10,  R1+R2+R3 横排
-#   rel_last3_replicates  rel_abund, D8-10,  R1+R2+R3 横排
+# abs_last3_replicates: abs_abund, D8-10, R1/R2/R3 arranged horizontally.
+# rel_last3_replicates: rel_abund, D8-10, R1/R2/R3 arranged horizontally.
 #
-# Scope (按 experiment 限制任务，避免无谓出图):
-#   mortality   : 仅 early 版本           (abs_early, rel_early)
-#   temperature : 仅 full 相关             (abs_full, rel_full,
+# Limit tasks by experiment to avoid generating unnecessary figures:
+# mortality: early versions only (abs_early, rel_early).
+# temperature: full-related versions only (abs_full, rel_full,
 #                                          abs_last3_replicates,
 #                                          rel_last3_replicates)
 #
-# 输出: figures/{SERIES_NAME}/{task_suffix}/{experiment}/{cond}/
-#         {experiment}_{cond}_C{nn}.pdf          (单replicate任务)
-#         {experiment}_{cond}_C{nn}_R1R2R3.pdf   (多replicate任务)
+# Output: figures/{SERIES_NAME}/{task_suffix}/{experiment}/{cond}/
+# {experiment}_{cond}_C{nn}.pdf for a single replicate.
+# {experiment}_{cond}_C{nn}_R1R2R3.pdf for multiple replicates.
 #
-# SERIES_NAME 可通过环境变量 ABUNDANCE_SERIES 覆盖
-# (默认 "series_01")，方便不同批次出图互不覆盖。
+# Override SERIES_NAME with the ABUNDANCE_SERIES environment variable.
+# The default, series_01, keeps different plotting batches separate.
 #
-# ── 修复版变更说明 ────────────────────────────────────────────
-# 1. COLORS 由全局命名向量改为按 experiment 拆分的列表
-#    COLORS_BY_EXP，避免 mortality / temperature 同名 taxon
-#    互相覆盖颜色。
-# 2. 色板参考图改用复合 key (experiment::taxon) 染色，
-#    facet 内的颜色与实际画图严格一致。
-# 3. abs_abund 路径同样调用 complete()，保证不同 community 间
-#    的堆叠顺序一致。
+# Implementation notes
+# 1. Replace the global named COLORS vector with a per-experiment list,
+# COLORS_BY_EXP, so same-name taxa in mortality and temperature
+# do not overwrite one another's colors.
+# 2. Use composite keys (experiment::taxon) in the palette reference figure
+# so facet colors match the analysis figures.
+# 3. Apply complete() to abs_abund as well, ensuring consistent
+# stacking order across communities.
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -48,28 +48,28 @@ suppressPackageStartupMessages({
   library(patchwork)
 })
 
-# ── 路径 ─────────────────────────────────────────────────────
+# Paths
 BASE_DIR <- community_workspace()
 PROC_DIR    <- file.path(BASE_DIR, "processed")
 SERIES_NAME <- Sys.getenv("ABUNDANCE_SERIES", unset = "series_01")
 FIG_DIR     <- file.path(BASE_DIR, "figures", SERIES_NAME)
 
-# ── 全局图形参数 ─────────────────────────────────────────────
+# Global plot parameters
 FONT_FAMILY <- "Arial"
-FONT_AX     <- 7      # pt 刻度文字
-FONT_LAB    <- 8      # pt 轴标签（保留备用）
-BORDER_SIZE <- 0.25   # mm 边框线宽
-TICK_SIZE   <- 0.20   # mm 刻度线宽
-TICK_LEN    <- -1.0   # mm 刻度线长（负值=向内）
+FONT_AX     <- 7      # Axis tick font size, pt
+FONT_LAB    <- 8      # Axis label font size, pt; reserved for later use
+BORDER_SIZE <- 0.25   # Border width, mm
+TICK_SIZE   <- 0.20   # Tick width, mm
+TICK_LEN    <- -1.0   # Tick length, mm; negative values point inward
 
-W_SINGLE <- 45   # mm 单子图宽度
-H_SINGLE <- 42   # mm 单子图高度
+W_SINGLE <- 45   # Single-panel width, mm
+H_SINGLE <- 42   # Single-panel height, mm
 
-# ── 任务定义 ─────────────────────────────────────────────────
-# abund_col : 使用的丰度列名
-# days      : 纳入的天数
-# reps      : 纳入的replicate编号（长度>1时横向拼图）
-# suffix    : 输出子目录名
+# Task definitions
+# abund_col: abundance column to plot.
+# days: included sampling days.
+# reps: replicate IDs; multiple replicates are arranged horizontally.
+# suffix: output subdirectory.
 TASKS <- list(
   abs_full             = list(abund_col = "abs_abund", days = 1:10,      reps = 1,   suffix = "abs_full"),
   abs_early            = list(abund_col = "abs_abund", days = 1:6,       reps = 1,   suffix = "abs_early"),
@@ -79,24 +79,24 @@ TASKS <- list(
   rel_last3_replicates = list(abund_col = "rel_abund", days = c(8,9,10), reps = 1:3, suffix = "rel_last3_replicates")
 )
 
-# ── 每个 experiment 只跑哪些 task（关键提速开关）─────────────
-# mortality   : 只有 D1-6 早期数据   → 仅 early
-# temperature : 只有 full / last3   → 跳过 early
+# Tasks enabled per experiment
+# mortality: D1-6 data only; use early tasks.
+# temperature: use full / last3 tasks and skip early tasks.
 TASK_SCOPE <- list(
   mortality   = c("abs_early", "rel_early"),
   temperature = c("abs_full", "rel_full",
                   "abs_last3_replicates", "rel_last3_replicates")
 )
 
-# 可选：通过环境变量 ABUNDANCE_TASK_PATTERN 进一步筛选 task
+# Optionally filter tasks using ABUNDANCE_TASK_PATTERN.
 TASK_PATTERN <- Sys.getenv("ABUNDANCE_TASK_PATTERN", unset = "")
 if (nzchar(TASK_PATTERN)) {
   TASK_SCOPE <- map(TASK_SCOPE, ~ keep(.x, ~ str_detect(.x, TASK_PATTERN)))
 }
 
-# ── Y轴配置 ──────────────────────────────────────────────────
-# abs：按实验分别设定（OD量级不同）
-# rel：全局统一0-1
+# Y-axis configuration
+# Absolute abundance: experiment-specific limits reflect different OD scales.
+# Relative abundance: a shared 0-1 scale.
 Y_CONFIG_ABS <- list(
   mortality   = list(limits = c(0, 2.2),
                      breaks = c(0, 1.1, 2.2),
@@ -111,11 +111,11 @@ Y_CONFIG_REL <- list(
   labels = c("0", "0.5", "1")
 )
 
-# ── X轴刻度辅助函数 ──────────────────────────────────────────
+# X-axis tick helper
 x_breaks_labels <- function(days) {
   d <- sort(days)
   if (length(d) == 3) {
-    # last3_replicates：显示全部3个天数
+    # For last3_replicates, show all three days.
     list(breaks = as.character(d),
          labels = as.character(d))
   } else if (max(d) == 10) {
@@ -127,7 +127,7 @@ x_breaks_labels <- function(days) {
   }
 }
 
-# ── 学术主题（单一定义）──────────────────────────────────────
+# Shared publication plot theme
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX, base_family = FONT_FAMILY) +
     theme(
@@ -160,7 +160,7 @@ theme_pub <- function() {
     )
 }
 
-# ── 核心画图函数（单个replicate的单张图）────────────────────
+# Draw one plot for a single replicate.
 plot_one <- function(df, abund_col, experiment, days, rep_id) {
   
   if (abund_col == "abs_abund") {
@@ -179,11 +179,11 @@ plot_one <- function(df, abund_col, experiment, days, rep_id) {
     )
   }
   
-  # 统一从全局 taxon levels 取顺序（保证不同 community 堆叠一致）
+  # Use global taxon levels for consistent stacking across communities.
   all_taxa <- COLOR_LEVELS[[experiment]]
   if (is.null(all_taxa)) all_taxa <- unique(df$taxon)
   
-  # rel / abs 都补全缺失行 → 同样的因子层级、同样的堆叠顺序
+  # Complete missing rows for both relative and absolute abundance.
   if (abund_col == "rel_abund") {
     df_plot <- df_plot %>%
       complete(taxon = all_taxa,
@@ -221,7 +221,7 @@ plot_one <- function(df, abund_col, experiment, days, rep_id) {
   
   if (y_max_actual > y_cfg$limits[2]) {
     warning(sprintf(
-      "[%s R%d] Y轴超出上限: 实际最大值 %.4f > 设定上限 %.4f",
+      "[%s R%d] Y-axis limit exceeded: observed maximum %.4f > configured upper limit %.4f",
       experiment, rep_id, y_max_actual, y_cfg$limits[2]
     ))
   }
@@ -229,7 +229,7 @@ plot_one <- function(df, abund_col, experiment, days, rep_id) {
   x_cfg    <- x_breaks_labels(days)
   x_levels <- as.character(sort(days))
   
-  # ★ 按 experiment 取颜色，避免 mortality/temperature 同名 taxon 互相覆盖
+  # Use experiment-specific colors to avoid same-name taxon collisions.
   exp_colors  <- COLORS_BY_EXP[[experiment]]
   used_colors <- exp_colors[names(exp_colors) %in% levels(droplevels(df_plot$taxon))]
   
@@ -257,37 +257,37 @@ plot_one <- function(df, abund_col, experiment, days, rep_id) {
     theme_pub()
 }
 
-# ── 读取全局色板 ─────────────────────────────────────────────
+# Read the global palette.
 color_df <- read_csv(file.path(PROC_DIR, "color_map.csv"),
                      show_col_types = FALSE)
 if (!"display_label" %in% names(color_df)) {
   color_df <- color_df %>% mutate(display_label = taxon)
 }
 
-# ★ 按 experiment 拆分 taxon → color 映射
-#   每个 experiment 独立的命名向量，键名是 taxon
+# Split the taxon-to-color mapping by experiment.
+# Each experiment has its own named vector keyed by taxon.
 COLORS_BY_EXP <- color_df %>%
   split(.$experiment) %>%
   map(~ setNames(.x$color, .x$taxon))
 
-# 按 experiment 拆分 taxon 顺序（用于 factor levels 和堆叠顺序）
+# Split taxon order by experiment for factor levels and stacking.
 COLOR_LEVELS <- split(color_df$taxon, color_df$experiment)
 
-# ── 主循环 ───────────────────────────────────────────────────
-cat(sprintf("输出根目录: %s\n", FIG_DIR))
+# Main loop
+cat(sprintf("Output root: %s\n", FIG_DIR))
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
 for (experiment in c("mortality", "temperature")) {
   cat(sprintf("\n=== %s ===\n", experiment))
   
-  # 选取该 experiment 需要跑的 task
+  # Select tasks enabled for this experiment.
   scope_keys <- TASK_SCOPE[[experiment]]
   if (is.null(scope_keys) || length(scope_keys) == 0) {
-    cat("  (跳过：scope 中无任务)\n")
+    cat("  (skipped: no tasks in scope)\n")
     next
   }
   scoped_tasks <- TASKS[scope_keys]
-  cat(sprintf("  待跑任务: %s\n", paste(scope_keys, collapse = ", ")))
+  cat(sprintf("  Selected tasks: %s\n", paste(scope_keys, collapse = ", ")))
   
   for (cond in paste0("W", 1:5)) {
     csv_path <- file.path(PROC_DIR, experiment, cond, "abs_abundance.csv")
@@ -307,7 +307,7 @@ for (experiment in c("mortality", "temperature")) {
         df_comm <- df_cond %>% filter(community == comm_num)
         
         if (multi_rep) {
-          # 多replicate：横向拼图
+          # Arrange multiple replicates horizontally.
           plots <- map(task$reps, function(r) {
             plot_one(df_comm, task$abund_col, experiment,
                      task$days, rep_id = r)
@@ -326,7 +326,7 @@ for (experiment in c("mortality", "temperature")) {
             device   = cairo_pdf
           )
         } else {
-          # 单replicate：单张输出
+          # Export a single-replicate figure.
           p <- plot_one(df_comm, task$abund_col, experiment,
                         task$days, rep_id = task$reps)
           
@@ -342,17 +342,17 @@ for (experiment in c("mortality", "temperature")) {
           )
         }
       }
-      cat(sprintf("    -> %s/%s/%s/ 完成\n",
+      cat(sprintf("    -> %s/%s/%s/ done\n",
                   task$suffix, experiment, cond))
     }
   }
 }
 
-# ── 色板参考图 ───────────────────────────────────────────────
-cat("\n生成色板参考图...\n")
+# Palette reference figure
+cat("\nGenerating palette reference figure...\n")
 
-# ★ 用复合 key (experiment::taxon) 作为 fill aesthetic
-#   这样两个 facet 即使 taxon 同名，也会分别拿到自己的颜色
+# Use composite keys (experiment::taxon) for the fill aesthetic.
+# Same-name taxa in different facets retain their experiment-specific colors.
 color_df_for_palette <- color_df %>%
   mutate(
     fill_key = paste(experiment, taxon, sep = "::"),
@@ -392,15 +392,15 @@ ggsave(
   device   = cairo_pdf
 )
 
-cat("完成！\n\n")
-cat("输出结构:\n")
+cat("Done!\n\n")
+cat("Output structure:\n")
 cat(sprintf("figures/%s/\n", SERIES_NAME))
 cat("  color_palette_reference.pdf\n")
 for (experiment in names(TASK_SCOPE)) {
   scope_keys <- TASK_SCOPE[[experiment]]
   for (key in scope_keys) {
     task    <- TASKS[[key]]
-    rep_tag <- if (length(task$reps) > 1) "R1R2R3横排" else "R1"
+    rep_tag <- if (length(task$reps) > 1) "R1R2R3_horizontal" else "R1"
     cat(sprintf("  %s/%s/  [%s, Day%s, %s]\n",
                 task$suffix, experiment,
                 task$abund_col,

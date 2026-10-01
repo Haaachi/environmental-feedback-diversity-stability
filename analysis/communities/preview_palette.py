@@ -1,20 +1,15 @@
 """
-preview_palette.py
-仅基于 annotation 文件预览真实数据的色板。
-不需要测序/OD 数据。
+Preview the data palette from species annotations without sequencing or OD inputs.
 
-用法
-----
-1. 把 Unified_species_annotations.xlsx (或 mapping .tsv/.csv) 放在
-   ./data/ 目录下
-2. 运行: python3 preview_palette.py
-3. 输出: palette_preview.html (浏览器打开) + palette_preview.csv
+1. Place Unified_species_annotations.xlsx or a mapping TSV/CSV in ./data/.
+2. Run: python3 preview_palette.py
+3. Open palette_preview.html in a browser; palette_preview.csv is also saved.
 """
 
 import os
 import sys
 
-# 确保能 import 主模块
+# Allow importing the main module.
 BASE_DIR = os.environ.get("COMMUNITY_WORKSPACE", os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
@@ -26,7 +21,7 @@ from process_abundance import (
 
 
 def main():
-    print("加载 annotation...")
+    print("Loading annotations...")
     ann_df = load_annotation_map()
 
     m_taxa = set(ann_df[ann_df["experiment"] == "mortality"]["taxon"])
@@ -34,22 +29,22 @@ def main():
 
     print(f"  mortality:   {len(m_taxa)} taxa")
     print(f"  temperature: {len(t_taxa)} taxa")
-    print(f"  总计:        {len(m_taxa) + len(t_taxa)} (两实验独立计数)")
+    print(f"  Total:        {len(m_taxa) + len(t_taxa)} (experiments counted independently)")
 
-    print("\n生成色板...")
+    print("\nGenerating palette...")
     color_df = generate_color_palette(m_taxa, t_taxa, ann_df)
 
-    # 写 CSV
+    # Write CSV.
     csv_path = os.path.join(BASE_DIR, "palette_preview.csv")
     color_df.to_csv(csv_path, index=False)
     print(f"  -> {csv_path}")
 
-    # 写 HTML 预览
+    # Write the HTML preview.
     html_path = os.path.join(BASE_DIR, "palette_preview.html")
     _write_html(color_df, html_path)
     print(f"  -> {html_path}")
 
-    # 重复颜色检查
+    # Check for duplicate colors.
     for exp in ["mortality", "temperature"]:
         sub = color_df[color_df["experiment"] == exp]
         n_total = len(sub)

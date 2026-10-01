@@ -8,14 +8,14 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_diversity.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# temperature：散点橙/紫区分震荡状态，Y轴固定范围
-# mortality：  散点统一单色，Y轴上限贴近数据最大值
-# 折线+errorbar：所有点的均值±SEM
-# Y轴：0附近无padding
+# Temperature: orange/purple points distinguish instability groups; fixed Y limits.
+# Mortality: single-color points; Y upper limit follows the observed maximum.
+# Lines and error bars show the overall mean +/- SEM.
+# No Y-axis padding near zero.
 #
-# 输出: figures/diversity/{experiment}/{window}/
+# Output: figures/diversity/{experiment}/{window}/
 # ===========================================================
 
 suppressPackageStartupMessages({
@@ -29,7 +29,7 @@ PROC_DIR <- file.path(BASE_DIR, "processed")
 FIG_DIR  <- file.path(BASE_DIR, "figures", "diversity_global_cv_rank")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
-# ── 判据 ─────────────────────────────────────────────────────
+# Operational grouping criterion
 COMMUNITY_CV_THRESHOLD <- 0.265
 
 is_fluctuating_composite <- function(experiment, community_cv) {
@@ -45,7 +45,7 @@ ensure_collapsed_col <- function(df) {
   df
 }
 
-# ── 配色 ─────────────────────────────────────────────────────
+# Colors
 COLOR_FLUCT    <- "#F4A460"
 COLOR_STABLE   <- "#9B8EC4"
 COLOR_NODATA   <- "#BBBBBB"
@@ -53,9 +53,9 @@ CV_COLOR_LOW    <- "#0057FF"
 CV_COLOR_HIGH   <- "#FF0000"
 CV_COLOR_VALUES <- c(COLOR_STABLE, "#F2F2F2", COLOR_FLUCT)
 CV_COLOR_LIMITS <- c(0, 1)
-COLOR_MORTALITY <- "#7A9FC2"   # mortality单色（中性蓝灰）
+COLOR_MORTALITY <- "#7A9FC2"   # Mortality: neutral blue-gray
 
-# ── 图形参数 ─────────────────────────────────────────────────
+# Plot parameters
 FONT_FAMILY <- "Arial"
 FONT_AX     <- 10
 FONT_LAB    <- 12
@@ -75,7 +75,7 @@ ERR_WIDTH    <- 0.12
 ERR_LW       <- 0.35
 MEAN_SIZE    <- 2.0
 
-# ── X轴标签 ──────────────────────────────────────────────────
+# X-axis labels
 X_LABELS <- list(
   mortality = c(
     "W1" = expression(10^{1}),
@@ -94,7 +94,7 @@ X_LABELS <- list(
 )
 
 
-# ── 指标定义 ─────────────────────────────────────────────────
+# Metric definitions
 ALPHA_METRICS <- list(
   richness          = list(ylim = NULL),
   shannon           = list(ylim = c(0, 1.6)),
@@ -122,7 +122,7 @@ MEAN_DAILY_METRICS <- list(
   mean_daily_survival_fraction = list(ylim = c(0, 1))
 )
 
-# ── 学术主题 ─────────────────────────────────────────────────
+# Publication plot theme
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX, base_family = FONT_FAMILY) +
     theme(
@@ -238,7 +238,7 @@ plot_metric <- function(df_metric, cv_df,
   if (nrow(df_plot) == 0) return(NULL)
   if (sum(!is.na(df_plot[[metric_col]])) == 0) return(NULL)
   
-  # 均值和SEM
+  # Mean and SEM
   summary_df <- df_plot %>%
     filter(!is.na(.data[[metric_col]])) %>%
     group_by(condition, x_pos) %>%
@@ -253,14 +253,14 @@ plot_metric <- function(df_metric, cv_df,
       ymax = mean_val + sem_val
     )
   
-  # ── Y轴范围（统一逻辑）────────────────────────────────────
+  # Shared Y-axis limit logic
   data_max <- max(df_plot[[metric_col]], na.rm = TRUE)
   
-  # ── Y轴范围（统一逻辑）────────────────────────────────────
+  # Shared Y-axis limit logic
   if (!is.null(ylim_fixed)) {
     y_lower <- ylim_fixed[1]
     y_upper <- ylim_fixed[2]
-    # 生成刻度后严格截断，防止 pretty() 自动外扩改变 limits
+    # Clip ticks strictly so pretty() cannot expand the limits.
     y_breaks <- pretty(c(y_lower, y_upper), n = 4)
     y_breaks <- y_breaks[y_breaks >= y_lower & y_breaks <= y_upper]
   } else {
@@ -268,11 +268,11 @@ plot_metric <- function(df_metric, cv_df,
     y_lower <- 0
     y_upper <- data_max * 1.05
     y_breaks <- pretty(c(y_lower, y_upper), n = 4)
-    y_upper <- max(y_breaks) # 动态模式下以最大刻度为上限
+    y_upper <- max(y_breaks) # In dynamic mode, use the largest tick as the upper limit.
   }
   set.seed(42)
   
-  # ── 散点层（统一颜色映射）────────────────────────────────
+  # Scatter layer with a shared color mapping
   scatter_layer <- geom_jitter(
     data   = df_plot %>%
       filter(!is.na(.data[[metric_col]])),
@@ -329,12 +329,12 @@ plot_metric <- function(df_metric, cv_df,
   p
 }
 
-# ── 主循环 ───────────────────────────────────────────────────
+# Main loop
 save_community_cv_legend(FIG_DIR)
 
 for (experiment in c("mortality", "temperature")) {
   for (window in c("full", "early")) {
-    # 跳过 mortality / full
+    # Skip mortality / full.
     if (experiment == "mortality" && window == "full") next
     if (experiment == "temperature" && window == "early") next
     
@@ -343,7 +343,7 @@ for (experiment in c("mortality", "temperature")) {
     fluc_path <- file.path(PROC_DIR, "fluctuations", window,
                            "community_level.csv")
     if (!file.exists(fluc_path)) {
-      cat("  [跳过] fluctuations数据不存在\n")
+      cat("  [skip] fluctuations data missing\n")
       next
     }
     cv_df <- read_csv(fluc_path, show_col_types = FALSE) %>%
@@ -374,14 +374,14 @@ for (experiment in c("mortality", "temperature")) {
       for (metric in names(ALPHA_METRICS)) {
         if (!metric %in% colnames(alpha_df)) next
         
-        # --- 新增：动态判断并覆盖 ylim ---
+        # Determine and override ylim dynamically.
         current_ylim <- ALPHA_METRICS[[metric]]$ylim
         if (experiment == "temperature" && metric == "survival_fraction") {
           current_ylim <- c(0, 0.8)
         }
         # ---------------------------------
         
-        # 将传入的 ALPHA_METRICS[[metric]]$ylim 替换为 current_ylim
+        # Replace ALPHA_METRICS[[metric]]$ylim with current_ylim.
         p <- plot_metric(alpha_df, cv_df, metric, experiment,
                          current_ylim)
         
@@ -429,7 +429,7 @@ for (experiment in c("mortality", "temperature")) {
       }
     }
     
-    # ── Beta within（仅full窗口）─────────────────────────────
+    # Within-condition beta diversity: full window only
     if (window == "full") {
       bw_path <- file.path(PROC_DIR, "diversity", window,
                            "beta_within.csv")
@@ -465,7 +465,7 @@ for (experiment in c("mortality", "temperature")) {
   }
 }
 
-cat("\n完成！\n")
-cat(sprintf("  判据: community_cv >= %.2f\n", COMMUNITY_CV_THRESHOLD))
-cat("  temperature: 橙=Fluctuation 紫=Stable 灰=无数据\n")
-cat("  mortality:   散点统一蓝灰色，Y轴贴近数据最大值\n")
+cat("\nDone!\n")
+cat(sprintf("  Criterion: community_cv >= %.2f\n", COMMUNITY_CV_THRESHOLD))
+cat("  temperature: orange=Fluctuation purple=Stable gray=missing data\n")
+cat("  mortality:   blue-gray points; Y upper limit follows the observed maximum\n")

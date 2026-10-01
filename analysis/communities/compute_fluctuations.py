@@ -1,34 +1,26 @@
-﻿"""
-compute_fluctuations.py
-=======================
-璁＄畻姣忎釜 experiment 脳 condition 脳 community 脳 replica 鐨勯渿鑽℃寚鏍?
-淇濈暀涓変釜鎸囨爣锛?  1. community_cv
-       = 危岬?蟽岬abs / mean_total_abs
-       鍒嗗瓙锛氭牳蹇僼axon鐨刟bs_std涔嬪拰锛堝叏閮ㄦ湁鏁堢偣鍚?璁＄畻std锛?       鍒嗘瘝锛氭椂闂寸獥鍐呯兢钀芥€荤敓鐗╅噺鍧囧€硷紙= mean OD锛?       鐗╃悊鎰忎箟锛氱兢钀芥暣浣撴尝鍔ㄩ噺 / 缇よ惤骞冲潎鐢熺墿閲?
-  2. total_biomass_cv
-       = std(OD_t) / mean(OD_t)锛屼粎鐢ㄦ椂闂寸獥鍐呯殑OD
-       绾疧D灞傞潰鐨勭敓鐗╅噺娉㈠姩锛屼笉渚濊禆娴嬪簭鏁版嵁
+"""
+Compute instability metrics per experiment x condition x community x replicate.
 
-  3. temporal_bc_mean
-       鏃堕棿绐楀唴鎵€鏈夊ぉ涓や袱涔嬮棿 Bray-Curtis 璺濈鐨勫潎鍊?       锛坋.g. Day 8/9/10 鈫?3瀵癸細8vs9, 8vs10, 9vs10锛?       鍙叧娉ㄧ兢钀界粨鏋勬湰韬殑闇囪崱锛屼笌缁濆OD鏃犲叧
-       涓板害鍚戦噺锛氭瘡澶╁瓨娲籺axon鐨?rel_abund锛堟浜＄疆0锛夛紝
-       涓嶄娇鐢?abs_abund锛岀‘淇濅笌OD閲忕骇瑙ｈ€?
-鏍稿績璁捐锛氶噸褰掍竴鍖?鈫?娑堥櫎娴嬪簭鎵规鏁堝簲
-  Step 1  鍣煶杩囨护锛圢OISE_THRESHOLD=0锛岄粯璁や笉杩囨护锛?  Step 2  淇濈暀taxon姣忓ぉ rel_abund 閲嶅綊涓€鍖栧埌100%
-          abs_abund_clean = rel_abund_clean / 100 脳 OD
-  Step 3  璁＄畻浠ヤ笂涓変釜鎸囨爣
+community_cv = sum of species absolute-abundance sample SDs / mean total biomass.
+Each species SD includes valid zero observations. Mean total abundance equals
+mean reconstructed OD over the analysis window.
 
-宕╂簝鍒ゅ畾锛氭椂闂寸獥鍐呮瘡澶?total abs_abund 鍧囧€?< COLLAPSE_THRESHOLD (0.05)
-  鈫?鎵€鏈夋寚鏍囩疆0锛宑ollapsed = True
+total_biomass_cv = sample SD(OD_t) / mean(OD_t), using only window OD values.
+This separate biomass metric does not require sequencing proportions.
 
-杈撳嚭锛堜繚鎸佷笌鍘熺増鐩稿悓璺緞缁撴瀯锛夛細
-  processed/fluctuations/
-  鈹溾攢鈹€ full/
-  鈹?  鈹溾攢鈹€ taxon_level.csv
-  鈹?  鈹斺攢鈹€ community_level.csv
-  鈹斺攢鈹€ early/
-      鈹溾攢鈹€ taxon_level.csv
-      鈹斺攢鈹€ community_level.csv
+temporal_bc_mean is the mean Bray-Curtis distance between all day pairs in the
+window (three pairs for days 8, 9 and 10). Use relative-abundance vectors after
+noise handling and renormalization so the metric is independent of OD scale.
+
+Processing steps:
+1. Apply optional noise filtering (default NOISE_THRESHOLD = 0).
+2. Renormalize retained daily rel_abund to 100% and reconstruct
+   abs_abund_clean = rel_abund_clean / 100 * OD.
+3. Calculate species- and community-level metrics.
+
+If mean daily total absolute abundance is below COLLAPSE_THRESHOLD (0.05),
+set community metrics to zero and collapsed = True.
+Outputs: processed/fluctuations/{window}/taxon_level.csv and community_level.csv.
 """
 
 import os
@@ -40,8 +32,8 @@ BASE_DIR = os.environ.get("COMMUNITY_WORKSPACE", os.path.dirname(os.path.abspath
 PROC_DIR = os.path.join(BASE_DIR, "processed")
 OUT_DIR  = os.path.join(PROC_DIR, "fluctuations")
 
-# 鈹€鈹€ 鍙傛暟 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
-COLLAPSE_THRESHOLD = 0.05  # mean total abs_abund 浣庝簬姝ゅ€艰涓篶ollapsed
+# Parameters
+COLLAPSE_THRESHOLD = 0.05  # Mean total absolute abundance below this value defines collapse.
 COMMUNITY_CV_THRESHOLD = 0.265
 LOG_PSEUDOCOUNT_FRAC = 1e-4
 LOG_PSEUDOCOUNT_FLOOR = 1e-12
@@ -78,7 +70,7 @@ def condition_community_universe(df, experiment, condition):
         communities.update(range(1, 13))
     return sorted(communities)
 
-# 鈹€鈹€ collapsed缇よ惤鎸囨爣妯℃澘 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# Record template for collapsed communities
 def make_collapsed_record(base, mean_total_abs):
     return {
         **base,
@@ -101,7 +93,7 @@ def make_collapsed_record(base, mean_total_abs):
         "collapsed":         True,
     }
 
-# 鈹€鈹€ Bray-Curtis璺濈 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# Bray-Curtis distance
 def calc_bray_curtis(p1, p2):
     p1    = np.array(p1, dtype=float)
     p2    = np.array(p2, dtype=float)
@@ -142,12 +134,16 @@ def weighted_log_sd_from_taxa(df_taxon):
 
     return float(np.sum(weights[valid] * log_sd[valid]) / valid_weight)
 
-# 鈹€鈹€ taxon灞傞潰鎸囨爣锛堜粎淇濈暀 community_cv 鎵€闇€鐨?abs_std锛夆攢鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# Taxon metrics contributing to community instability
 def compute_taxon_metrics(vals_abs_clean, log_pseudocount):
     """
-    vals_abs_clean锛氶噸褰掍竴鍖栧悗鐨刟bs涓板害鏃堕棿搴忓垪锛堝惈0锛岀己澶卞ぉ涓簄an锛?    杩斿洖锛歛bs_std锛堝惈0璁＄畻锛夊拰 abs_mean锛堝惈0璁＄畻锛?    鐢ㄤ簬 community_cv 鐨勫垎瀛愮疮鍔?    """
+    Compute sample SD, mean abundance and log-abundance SD for a taxon.
+    The renormalized absolute-abundance series includes zeros and represents
+    missing days with NaN. Exclude missing values, retaining zeros; species SDs
+    contribute to the community_cv numerator.
+    """
     vals = np.array(vals_abs_clean, dtype=float)
-    valid = vals[~np.isnan(vals)]   # 淇濈暀0
+    valid = vals[~np.isnan(vals)]   # Retain zeros.
     if len(valid) >= 2:
         abs_std  = float(np.std(valid, ddof=1))
         abs_mean = float(np.mean(valid))
@@ -162,13 +158,13 @@ def compute_taxon_metrics(vals_abs_clean, log_pseudocount):
     return {"abs_std": abs_std, "abs_mean": abs_mean,
             "log_abs_sd": log_abs_sd}
 
-# 鈹€鈹€ 涓绘祦绋?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# Main workflow
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
 
     for window_name, exp_cfg in TIME_WINDOWS.items():
         days = "configured per experiment"
-        print(f"\n=== 鏃堕棿绐楀彛: {window_name} (Day {days}) ===")
+        print(f"\n=== Analysis window: {window_name} (Day {days}) ===")
 
         taxon_records     = []
         community_records = []
@@ -221,7 +217,7 @@ def main():
                                       f"{cond} C{comm} R{rep}")
                             continue
 
-                        # 鈹€鈹€ 宕╂簝妫€鏌?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+                        # Check for collapse.
                         mean_total_abs = (
                             df_rep.groupby("day")["abs_abund"]
                             .sum().mean()
@@ -244,10 +240,10 @@ def main():
                             .sum().gt(0).sum()
                         )
 
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
-                        # 鎸囨爣2锛歵otal_biomass_cv
-                        # 鐩存帴鐢ㄦ椂闂寸獥鍐呮瘡澶╃殑 total OD
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+                        # ------------------------------------------------------------
+                        # Metric 2: total_biomass_cv
+                        # Use daily total OD within the analysis window directly.
+                        # ------------------------------------------------------------
                         od_by_day = (
                             df_rep.groupby("day")["OD"].mean()
                         )
@@ -261,8 +257,8 @@ def main():
                             total_biomass_std = np.nan
                             total_biomass_cv = np.nan
 
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+                        # ------------------------------------------------------------
+                        # ------------------------------------------------------------
                         core_taxa = sorted(df_rep["taxon"].unique())
 
                         if len(core_taxa) == 0:
@@ -290,8 +286,8 @@ def main():
                             df_rep["taxon"].isin(core_taxa)
                         ].copy()
 
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
-                        # Step 2锛氶噸鏂板綊涓€鍖?                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+                        # ------------------------------------------------------------
+                        # Step 2: renormalize retained daily abundances.
                         day_totals = (
                             df_core.groupby("day")["rel_abund"]
                             .sum().rename("day_total")
@@ -313,9 +309,9 @@ def main():
                             / 100.0 * df_core["OD"]
                         )
 
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
-                        # Step 3a锛歵axon灞傞潰 鈫?community_cv 鍒嗗瓙
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+                        # ------------------------------------------------------------
+                        # Step 3a: taxon metrics contributing to the community_cv numerator.
+                        # ------------------------------------------------------------
                         taxon_rows = []
                         log_pseudocount = log_pseudocount_for(mean_total_abs)
                         for taxon in core_taxa:
@@ -330,7 +326,7 @@ def main():
                                     if len(row) > 0 else np.nan
                                 )
 
-                            # 闈為浂鏈夋晥鐐?< 2 鈫?璺宠繃
+                            # Skip taxa with fewer than two valid nonzero observations.
                             m = compute_taxon_metrics(vals_abs_clean,
                                                       log_pseudocount)
                             row_data = {
@@ -342,9 +338,9 @@ def main():
                             }
                             taxon_rows.append(row_data)
 
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
-                        # community_cv = 危蟽岬abs / mean_total_abs
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+                        # ------------------------------------------------------------
+                        # community_cv = sum(species absolute-abundance SDs) / mean_total_abs.
+                        # ------------------------------------------------------------
                         if len(taxon_rows) > 0:
                             df_taxon   = pd.DataFrame(taxon_rows)
                             weighted_log_sd = round(
@@ -388,9 +384,9 @@ def main():
                             sum_rel_std = np.nan
                             community_cv_rel = np.nan
 
-                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
-                        # Step 3b锛歵emporal_bc_mean
-                        # 姣忓ぉ鐢?rel_abund锛堝瓨娲荤疆鍘熷€硷紝姝讳骸缃?锛夋瀯寤哄悜閲?                        # 鎵€鏈夊ぉ涓や袱BC璺濈鐨勫潎鍊?                        # 鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲鈺愨晲
+                        # ------------------------------------------------------------
+                        # Step 3b: temporal_bc_mean.
+                        # Construct daily relative-abundance vectors and average BC over all day pairs.
                         all_taxa_sorted = sorted(df_rep["taxon"].unique())
                         day_vecs = {}
                         for d in days:
@@ -425,7 +421,7 @@ def main():
                             if len(bc_vals) > 0 else np.nan
                         )
 
-                        # 鈹€鈹€ 姹囨€?鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+                        # Summarize community metrics.
                         community_records.append({
                             **base,
                             "community_cv":     community_cv,
@@ -444,7 +440,7 @@ def main():
                             "collapsed":        False,
                         })
 
-        # 鈹€鈹€ 淇濆瓨锛堣矾寰勪笌鍘熺増瀹屽叏涓€鑷达級鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+        # Save outputs using the original directory structure.
         out_subdir = os.path.join(OUT_DIR, window_name)
         os.makedirs(out_subdir, exist_ok=True)
 
@@ -464,7 +460,7 @@ def main():
             "Stable",
         )
 
-        # taxon_level 鍙繚鐣欏繀瑕佸垪
+        # Retain only the required taxon-level columns.
         taxon_cols = ["experiment", "condition", "community", "replica",
                       "n_days", "taxon", "abs_std", "abs_mean",
                       "log_abs_sd", "mean_abs_weight"]

@@ -1,45 +1,68 @@
-# 数据与计算口径
+# Data and analysis conventions
 
-## 已纳入的输入
+## Included inputs
 
-`analysis/communities/data/` 包含 Temperature/Mortality 的统一群落、OD、pH Excel，
-`Summary.xlsx` 以及统一物种注释 Excel/TSV。
-`analysis/isolates/Summary.xlsx` 是独立单菌株周期内测量表。
-两处 Summary 文件分别保留原始来源，未假定它们完全相同。
+`analysis/communities/data/` contains unified Temperature/Mortality community,
+OD and pH workbooks, `Summary.xlsx`, and unified species annotations in Excel/TSV
+format. `analysis/isolates/Summary.xlsx` contains separate within-cycle isolate
+measurements. Both Summary files retain their respective sources; they are not
+assumed to be identical.
 
-`sequencing/sequence_data/All_Strains_Combined.fasta` 是菌株参考序列；
-`Library_taxonomy_groups_v3.xlsx` 用于参考菌株与实验物种的严格映射和性状合并。
+`sequencing/sequence_data/All_Strains_Combined.fasta` contains reference isolate
+sequences. `Library_taxonomy_groups_v3.xlsx` supports strict mapping between
+reference isolates and experimental species and merging for trait measurement.
 
-## 未纳入的输入与结果
+Workbook notes and taxonomy labels have been translated into English without
+changing numeric measurements, identifiers, sequences or workbook formatting.
+The sequencing readers also accept the original labels when restoring older inputs.
 
-- 原始 FASTQ、QIIME2 QZA/QZV、完整测序导出表、BLAST 数据库。
-- 模型 HDF5/NPZ 大规模结果，恢复位置见 `model/data/runs/datasets.yaml`。
-- 自动生成的 processed、figures、缓存、历史模型重复包和论文文稿。
+## Excluded inputs and outputs
 
-从原课题目录恢复测序输入时，对应关系如下：
+- Raw FASTQ files, QIIME2 QZA/QZV artifacts, full sequencing export tables and BLAST databases.
+- Large model HDF5/NPZ outputs; locations are recorded in `model/data/runs/datasets.yaml`.
+- Generated processed tables, figures, caches, historical duplicate model packages and manuscript files.
 
-| 原目录（相对于课题根目录） | 仓库恢复位置 |
+Restore exported sequencing inputs from the original project directory as follows:
+
+| Original directory, relative to the project root | Repository destination |
 | --- | --- |
 | `code/sequence pipeline/sequence_data/16s_project/exported/` | `sequencing/sequence_data/16s_project/exported/` |
 | `code/sequence pipeline/sequence_data/Mortality_analysis/exported/` | `sequencing/sequence_data/Mortality_analysis/exported/` |
 
-共享 ASV 流程会重新生成物种识别结果，但不会自动替换仓库中作为实验分析基准的统一 Excel。
-若要替换，请比较分组与命名变化，更新全部匹配的注释输入后再运行群落分析。
+The shared ASV pipeline regenerates species-identification outputs but does not
+automatically replace the unified Excel workbooks used as experimental analysis
+inputs. Before replacing them, compare grouping and naming changes and update
+all matching annotation inputs.
 
-## 可选脚本的数据缺口
+## Missing inputs for optional scripts
 
-`rvstemperature.R` 还需要 `analysis/communities/data/rK_expfit_skip0.xlsx`；
-`plot_species_temperature.R` 还需要 `analysis/communities/data/Speciestemperature.xlsx`。
-原始 data 目录没有这两个文件，因此它们不属于默认复现入口。
+`rvstemperature.R` requires `analysis/communities/data/rK_expfit_skip0.xlsx`.
+`plot_species_temperature.R` requires `analysis/communities/data/Speciestemperature.xlsx`.
+Neither file was present in the original data directory, so these scripts are
+excluded from the default reproduction entry point.
 
-16S 拷贝数校正脚本优先读 `Unified_species_annotations_with_16S_copy_number.xlsx`；
-该专用文件目前缺失，脚本可能回退至已有物种注释。
-运行校正分析前应检查实际拷贝数信息，不能将回退结果视为已完整校正。
+The 16S copy-number correction script first looks for
+`Unified_species_annotations_with_16S_copy_number.xlsx`. This dedicated file is
+currently missing, and the script may fall back to existing species annotations.
+Check the available copy-number information before running correction; a fallback
+result should not be treated as fully copy-number corrected.
 
-## 实验与模型的口径不同
+## Experimental and model conventions
 
-实验脚本的 relative abundance 单位为百分数，presence 常使用 1%；
-实验 biomass collapse 阈值通常为 0.05。
-模型使用 B readout，collapse 阈值为 1e-3，fluctuation 分类使用 CV > 0.1。
-实验窗口、presence 判定和波动阈值按各脚本原始定义保留，不能直接套用模型阈值。
-测序物种判定排除的低 OD 样本，与最终群落统计保留的 collapse 群落也有不同用途。
+Experimental relative abundance is expressed as a percentage; presence often
+uses a 1% threshold. The experimental biomass collapse threshold is generally
+0.05. The model uses the B readout, a collapse threshold of 1e-3 and CV > 0.1 for
+fluctuation classification. Experimental windows, presence rules and instability
+thresholds retain each script's source definitions; model thresholds should not
+be applied directly to experimental data.
+
+The manuscript treats experimental instability primarily as a continuous
+quantity. Fig. 1f uses a global ranking split into high- and low-instability
+halves. The CV = 0.25 and accumulated Shannon = 0.8 guides describe regions in
+the experimental diversity-instability plane; they do not establish discrete
+dynamical classes. Some archived scripts still use CV = 0.265 for binary displays,
+while others use 0.25. This translation preserves those values; the discrepancy
+requires a separate methods reconciliation.
+
+Low-OD samples excluded during sequencing species identification and collapsed
+communities retained in final condition-level summaries serve different purposes.

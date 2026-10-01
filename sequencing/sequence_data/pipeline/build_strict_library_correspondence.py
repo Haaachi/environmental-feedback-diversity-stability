@@ -21,6 +21,8 @@ from typing import Any
 
 import pandas as pd
 
+from english_schema import normalize_frame
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_MATCHES = (
@@ -98,20 +100,20 @@ def read_matches(path: Path) -> list[dict[str, str]]:
 
 
 def read_library_taxonomy(path: Path) -> dict[str, dict[str, str]]:
-    df = pd.read_excel(path, sheet_name=0, header=2)
-    df = df[df["菌株编号"].notna()].copy()
-    df["菌株编号"] = df["菌株编号"].astype(str).str.strip()
+    df = normalize_frame(pd.read_excel(path, sheet_name=0, header=2))
+    df = df[df["Strain_ID"].notna()].copy()
+    df["Strain_ID"] = df["Strain_ID"].astype(str).str.strip()
 
     taxonomy: dict[str, dict[str, str]] = {}
     for _, row in df.iterrows():
-        strain_id = clean(row["菌株编号"])
+        strain_id = clean(row["Strain_ID"])
         taxonomy[strain_id] = {
             "Group_ID": clean(row["Group ID"]),
-            "Group_type": clean(row["类型"]),
+            "Group_type": clean(row["Group_type"]),
             "Family": clean(row["Family"]),
             "Genus": clean(row["Genus"]),
             "Species": clean(row["Species"]),
-            "Blast_annotation": clean(row["BLAST原始注释"]),
+            "Blast_annotation": clean(row["Original_BLAST_annotation"]),
         }
     return taxonomy
 
@@ -149,11 +151,11 @@ def experiment_family(row: dict[str, str], genus_to_family: dict[str, str]) -> s
 
 
 CONSISTENCY_LABELS = {
-    4: "species一致",
-    3: "genus一致",
-    2: "family一致",
-    1: "注释冲突",
-    0: "缺少库全长注释",
+    4: "species_agreement",
+    3: "genus_agreement",
+    2: "family_agreement",
+    1: "annotation_conflict",
+    0: "missing_library_full_length_annotation",
 }
 
 
@@ -186,7 +188,7 @@ def consistency_rank(
 
 def taxon_text(strain_id: str, tax_row: dict[str, str] | None) -> str:
     if tax_row is None:
-        return f"{strain_id}=缺少库全长注释"
+        return f"{strain_id}=missing_library_full_length_annotation"
     species = tax_row["Species"] or tax_row["Blast_annotation"] or tax_row["Genus"]
     group_id = tax_row["Group_ID"]
     return f"{strain_id}={species}" + (f"({group_id})" if group_id else "")
@@ -226,20 +228,20 @@ def build_correspondence(
         ]
         note = ""
         if dropped_missing:
-            note = "已排除缺少库全长注释的并列候选: " + ";".join(
+            note = "Excluded tied candidates lacking full-length library annotations: " + ";".join(
                 sorted(dropped_missing, key=library_id_sort_key)
             )
 
         rows.append(
             {
-                "实验": match_row["Experiment"],
-                "实验Species编号": match_row["Species"],
-                "实验注释": match_row["Unified_annotation"],
-                "对应库编号": ";".join(kept_ids),
-                "库全长注释": "; ".join(kept_taxa),
-                "注释一致性": consistency,
-                "候选数": len(kept_ids),
-                "备注": note,
+                "Experiment": match_row["Experiment"],
+                "Experimental_species_ID": match_row["Species"],
+                "Experimental_annotation": match_row["Unified_annotation"],
+                "Library_IDs": ";".join(kept_ids),
+                "Library_full_length_annotation": "; ".join(kept_taxa),
+                "Annotation_consistency": consistency,
+                "Candidate_count": len(kept_ids),
+                "Notes": note,
             }
         )
 
@@ -294,7 +296,7 @@ def main() -> None:
     write_tsv(tsv_path, rows)
     write_xlsx(xlsx_path, rows)
 
-    consistency_counts = pd.Series([row["注释一致性"] for row in rows]).value_counts().to_dict()
+    consistency_counts = pd.Series([row["Annotation_consistency"] for row in rows]).value_counts().to_dict()
     print(f"Wrote {len(rows)} rows: {tsv_path}")
     print(f"Wrote {len(rows)} rows: {xlsx_path}")
     print("Consistency counts:", consistency_counts)

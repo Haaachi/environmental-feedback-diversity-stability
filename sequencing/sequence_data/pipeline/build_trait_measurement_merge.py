@@ -20,6 +20,8 @@ from typing import Any
 
 import pandas as pd
 
+from english_schema import normalize_frame
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_STRICT = (
@@ -95,32 +97,32 @@ def annotation_tokens(annotation: str) -> set[str]:
 
 
 def annotations_compatible(a: dict[str, object], b: dict[str, object]) -> bool:
-    return bool(annotation_tokens(str(a["实验注释"])) & annotation_tokens(str(b["实验注释"])))
+    return bool(annotation_tokens(str(a["Experimental_annotation"])) & annotation_tokens(str(b["Experimental_annotation"])))
 
 
 def read_strict(path: Path) -> pd.DataFrame:
-    df = pd.read_csv(path, sep="\t", encoding="utf-8-sig")
-    df["Candidate_IDs"] = df["对应库编号"].map(split_ids)
+    df = normalize_frame(pd.read_csv(path, sep="\t", encoding="utf-8-sig"))
+    df["Candidate_IDs"] = df["Library_IDs"].map(split_ids)
     df["Candidate_Set"] = df["Candidate_IDs"].map(set)
-    df["Auto_merge_eligible"] = df["注释一致性"].isin(["species一致", "genus一致"])
+    df["Auto_merge_eligible"] = df["Annotation_consistency"].isin(["species_agreement", "genus_agreement"])
     return df
 
 
 def read_library_taxonomy(path: Path) -> dict[str, dict[str, str]]:
-    df = pd.read_excel(path, sheet_name=0, header=2)
-    df = df[df["菌株编号"].notna()].copy()
-    df["菌株编号"] = df["菌株编号"].astype(str).str.strip()
+    df = normalize_frame(pd.read_excel(path, sheet_name=0, header=2))
+    df = df[df["Strain_ID"].notna()].copy()
+    df["Strain_ID"] = df["Strain_ID"].astype(str).str.strip()
 
     taxonomy: dict[str, dict[str, str]] = {}
     for _, row in df.iterrows():
-        strain_id = clean(row["菌株编号"])
+        strain_id = clean(row["Strain_ID"])
         taxonomy[strain_id] = {
             "Group_ID": clean(row["Group ID"]),
-            "Group_type": clean(row["类型"]),
+            "Group_type": clean(row["Group_type"]),
             "Family": clean(row["Family"]),
             "Genus": clean(row["Genus"]),
             "Species": clean(row["Species"]),
-            "Blast_annotation": clean(row["BLAST原始注释"]),
+            "Blast_annotation": clean(row["Original_BLAST_annotation"]),
         }
     return taxonomy
 
@@ -166,9 +168,9 @@ def connected_components(rows: list[dict[str, object]], min_overlap: float) -> l
 
 def member_text(rows: list[dict[str, object]], experiment: str) -> str:
     members = [
-        f"{row['实验Species编号']}({row['实验注释']})"
+        f"{row['Experimental_species_ID']}({row['Experimental_annotation']})"
         for row in rows
-        if row["实验"] == experiment
+        if row["Experiment"] == experiment
     ]
     return "; ".join(members)
 
@@ -178,7 +180,7 @@ def taxon_text(ids: list[str], taxonomy: dict[str, dict[str, str]]) -> str:
     for strain_id in ids:
         tax = taxonomy.get(strain_id)
         if not tax:
-            parts.append(f"{strain_id}=缺少库全长注释")
+            parts.append(f"{strain_id}=missing_library_full_length_annotation")
             continue
         label = tax["Species"] or tax["Blast_annotation"] or tax["Genus"]
         group_id = tax["Group_ID"]
@@ -196,24 +198,24 @@ def library_groups(ids: list[str], taxonomy: dict[str, dict[str, str]]) -> str:
 
 
 def representative_annotation(rows: list[dict[str, object]]) -> str:
-    annotations = list(dict.fromkeys(clean(row["实验注释"]) for row in rows))
+    annotations = list(dict.fromkeys(clean(row["Experimental_annotation"]) for row in rows))
     return "; ".join(annotations)
 
 
 def merge_basis(rows: list[dict[str, object]], candidate_ids: list[str], used_intersection: bool) -> tuple[str, str]:
-    if any(row["注释一致性"] == "注释冲突" for row in rows):
-        return "注释冲突，保守独立", "需复核"
-    if any(row["注释一致性"] == "family一致" for row in rows):
-        return "仅family级一致，保守独立", "低"
+    if any(row["Annotation_consistency"] == "annotation_conflict" for row in rows):
+        return "Annotation conflict; conservatively retained separately", "review_needed"
+    if any(row["Annotation_consistency"] == "family_agreement" for row in rows):
+        return "Family-level agreement only; conservatively retained separately", "low"
     if len(rows) == 1:
-        return "单实验/单species独立保留", "独立"
+        return "Single experiment/species retained separately", "independent"
 
     candidate_sets = [set(row["Candidate_Set"]) for row in rows]
     if all(candidate_sets[0] == candidate_set for candidate_set in candidate_sets[1:]):
-        return "候选库编号完全一致", "高"
+        return "Identical candidate library ID sets", "high"
     if used_intersection:
-        return "候选库编号高重叠，取共同交集", "中"
-    return "候选库编号高重叠，但共同交集为空，取并集", "低"
+        return "Highly overlapping candidate IDs; use shared intersection", "medium"
+    return "Highly overlapping candidate IDs with empty shared intersection; use union", "low"
 
 
 def build_merged_rows(
@@ -242,58 +244,58 @@ def build_merged_rows(
             candidate_ids = sorted_library_ids(set.union(*candidate_sets))
 
         basis, confidence = merge_basis(rows, candidate_ids, used_intersection)
-        experiments = sorted({row["实验"] for row in rows})
+        experiments = sorted({row["Experiment"] for row in rows})
         if experiments == ["mortality", "temperature"]:
-            coverage = "两个实验共有"
+            coverage = "both_experiments"
         elif experiments == ["temperature"]:
-            coverage = "仅温度实验"
+            coverage = "temperature_only"
         else:
-            coverage = "仅死亡率实验"
+            coverage = "mortality_only"
 
         original_ids = "; ".join(
-            f"{row['实验']}:{row['实验Species编号']}" for row in sorted(rows, key=lambda r: (r["实验"], natural_key(r["实验Species编号"])))
+            f"{row['Experiment']}:{row['Experimental_species_ID']}" for row in sorted(rows, key=lambda r: (r["Experiment"], natural_key(r["Experimental_species_ID"])))
         )
         notes: list[str] = []
         if len(rows) > 1:
             per_experiment_counts = defaultdict(int)
             for row in rows:
-                per_experiment_counts[row["实验"]] += 1
+                per_experiment_counts[row["Experiment"]] += 1
             multi = [
-                f"{experiment}内{count}个species"
+                f"{experiment} contains {count} species"
                 for experiment, count in sorted(per_experiment_counts.items())
                 if count > 1
             ]
             if multi:
-                notes.append("同一测量单元包含" + "、".join(multi) + "，原species编号已保留")
-        if any(row["注释一致性"] == "注释冲突" for row in rows):
-            notes.append("不建议自动合并到其他单元")
+                notes.append("The same measurement unit contains " + ", ".join(multi) + "; original species IDs are retained")
+        if any(row["Annotation_consistency"] == "annotation_conflict" for row in rows):
+            notes.append("Automatic merging with other units is not recommended")
 
         merged.append(
             {
                 "Merged_ID": "",
-                "实验覆盖": coverage,
-                "温度species": member_text(rows, "temperature"),
-                "死亡率species": member_text(rows, "mortality"),
-                "合并后实验注释": representative_annotation(rows),
-                "推荐测量库编号": ";".join(candidate_ids),
-                "优先库编号": candidate_ids[0] if candidate_ids else "",
-                "库Group_ID": library_groups(candidate_ids, taxonomy),
-                "库全长注释": taxon_text(candidate_ids, taxonomy),
-                "合并依据": basis,
-                "合并置信": confidence,
-                "原始species数": len(rows),
-                "候选库编号数": len(candidate_ids),
-                "原始species索引": original_ids,
-                "备注": "；".join(notes),
+                "Experiment_coverage": coverage,
+                "Temperature_species": member_text(rows, "temperature"),
+                "Mortality_species": member_text(rows, "mortality"),
+                "Merged_experimental_annotation": representative_annotation(rows),
+                "Recommended_library_IDs": ";".join(candidate_ids),
+                "Preferred_library_ID": candidate_ids[0] if candidate_ids else "",
+                "Library_Group_ID": library_groups(candidate_ids, taxonomy),
+                "Library_full_length_annotation": taxon_text(candidate_ids, taxonomy),
+                "Merge_basis": basis,
+                "Merge_confidence": confidence,
+                "Original_species_count": len(rows),
+                "Candidate_library_ID_count": len(candidate_ids),
+                "Original_species_index": original_ids,
+                "Notes": "; ".join(notes),
             }
         )
 
     def output_sort_key(row: dict[str, object]) -> tuple[int, str, list[Any]]:
-        coverage_order = {"两个实验共有": 0, "仅温度实验": 1, "仅死亡率实验": 2}
+        coverage_order = {"both_experiments": 0, "temperature_only": 1, "mortality_only": 2}
         return (
-            coverage_order.get(str(row["实验覆盖"]), 9),
-            str(row["合并后实验注释"]).lower(),
-            natural_key(str(row["优先库编号"])),
+            coverage_order.get(str(row["Experiment_coverage"]), 9),
+            str(row["Merged_experimental_annotation"]).lower(),
+            natural_key(str(row["Preferred_library_ID"])),
         )
 
     merged.sort(key=output_sort_key)
@@ -360,8 +362,8 @@ def main() -> None:
     summary = pd.DataFrame(merged)
     print(f"Wrote {len(merged)} merged units: {tsv_path}")
     print(f"Wrote {len(merged)} merged units: {xlsx_path}")
-    print("Coverage counts:", summary["实验覆盖"].value_counts().to_dict())
-    print("Confidence counts:", summary["合并置信"].value_counts().to_dict())
+    print("Coverage counts:", summary["Experiment_coverage"].value_counts().to_dict())
+    print("Confidence counts:", summary["Merge_confidence"].value_counts().to_dict())
 
 
 if __name__ == "__main__":

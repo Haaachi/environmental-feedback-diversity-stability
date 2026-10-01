@@ -8,9 +8,9 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_species_decomposition_core.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 绘制核心 species decomposition / turnover 图：
+# Core species decomposition and turnover figures:
 #
 # 1. synchrony_phi
 # 2. community_cv vs total_biomass_cv
@@ -20,20 +20,20 @@ community_workspace <- function() {
 # 6. cumulative_excess_shannon
 # 7. turnover_events
 #
-# 要求：
-#   - last3 和 long 分开画
-#   - mortality 和 temperature 分开画
-#   - 图为正方形
-#   - 不在图中放图例
-#   - mortality 横坐标指数去掉负号：10^1, 10^2, ...
+# Plot requirements:
+# Draw last3 and long windows separately.
+# Draw mortality and temperature separately.
+# Use square figures.
+# Omit legends from the figures.
+# Mortality X-axis exponents are positive: 10^1, 10^2, etc.
 #   - raw points + mean ± SEM
 #
-# 输入:
+# Inputs:
 #   processed/species_decomposition/
 #     last3/community_decomposition.csv
 #     long/community_decomposition.csv
 #
-# 输出:
+# Outputs:
 #   figures/species_decomposition_core/
 # ===========================================================
 
@@ -51,7 +51,7 @@ dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 dir.create(STAT_DIR, showWarnings = FALSE, recursive = TRUE)
 
 # ============================================================
-# 图形参数
+# Plot parameters
 # ============================================================
 
 FONT_FAMILY <- "Arial"
@@ -61,7 +61,7 @@ BORDER_SIZE <- 0.25
 TICK_SIZE   <- 0.20
 TICK_LEN    <- -1.0
 
-# 正方形画布
+# Square canvas
 W_PLOT <- 75
 H_PLOT <- 75
 
@@ -80,16 +80,16 @@ SIG_COLOR   <- "black"
 SIG_TEXT_SIZE <- 3.0
 SIG_LW <- 0.25
 
-# 如果想在散点后面加轻量 boxplot，可改成 TRUE。
-# 主图建议 FALSE，因为 raw points + mean ± SEM 更清楚展示趋势。
+# Set TRUE to add a light boxplot behind the points.
+# FALSE is recommended for main figures showing raw points and mean +/- SEM.
 DRAW_BOXPLOT <- FALSE
 
 BOX_FILL  <- "grey90"
 BOX_COLOR <- "grey45"
 
 # ============================================================
-# X轴标签
-# mortality 去掉指数负号
+# X-axis labels
+# Use positive dilution-factor exponents for mortality.
 # ============================================================
 
 X_LABELS <- list(
@@ -119,7 +119,7 @@ scale_x_condition <- function(experiment) {
 }
 
 # ============================================================
-# 主题
+# Plot theme
 # ============================================================
 
 theme_pub <- function() {
@@ -195,7 +195,7 @@ add_x_pos <- function(df) {
 }
 
 # ============================================================
-# y轴范围工具
+# Y-axis limit helpers
 # ============================================================
 
 get_line_ylim <- function(values,
@@ -267,7 +267,7 @@ coord_square_condition <- function(ylim) {
 }
 
 # ============================================================
-# 读取数据
+# Read data.
 # ============================================================
 
 read_window <- function(window, filename = "community_decomposition.csv") {
@@ -392,7 +392,7 @@ record_temperature_w3_w4_test <- function(d, metric, window, experiment) {
 }
 
 # ============================================================
-# 通用：散点 + mean ± SEM 趋势图
+# Shared scatter plot with a mean +/- SEM trend
 # ============================================================
 
 plot_metric_mean_points <- function(df,
@@ -592,7 +592,7 @@ plot_metric_mean_points <- function(df,
 }
 
 # ============================================================
-# 图 2: community_cv vs total_biomass_cv
+# Figure 2: community_cv versus total_biomass_cv
 # ============================================================
 
 plot_cv_relationship <- function(df,
@@ -741,7 +741,7 @@ plot_cv_relationship <- function(df,
 }
 
 # ============================================================
-# 主循环：核心图
+# Main loop for core figures
 # ============================================================
 
 cat("\nPlotting core species decomposition figures...\n")
@@ -914,7 +914,7 @@ for (window in c("last3", "long")) {
 }
 
 # ============================================================
-# 输出索引
+# Output index
 # ============================================================
 
 index_df <- tibble(
@@ -966,9 +966,9 @@ if (length(STAT_ROWS) > 0) {
   cat(sprintf("  -> stats: %s\n", stat_path))
 }
 
-cat("\n完成！\n")
-cat(sprintf("输出目录: %s\n", FIG_DIR))
-cat("\n输出子目录:\n")
+cat("\nDone!\n")
+cat(sprintf("Output directory: %s\n", FIG_DIR))
+cat("\nOutput subdirectories:\n")
 cat("  synchrony_phi/\n")
 cat("  cv_relationship/\n")
 cat("  cv_relationship_fluctuating_cv/\n")
@@ -982,4 +982,4 @@ cat("  cumulative_excess_shannon/\n")
 cat("  cumulative_excess_shannon_fluctuating_cv/\n")
 cat("  turnover_events/\n")
 cat("  turnover_events_fluctuating_cv/\n")
-cat("\n注：如果你想检查分布形状，可把脚本顶部 DRAW_BOXPLOT <- TRUE。\n")
+cat("\nTo inspect distribution shapes, set DRAW_BOXPLOT <- TRUE at the top of the script.\n")

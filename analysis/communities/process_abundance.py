@@ -1,34 +1,17 @@
 """
-process_abundance.py
-主目录: /home/hachi/Tem_mortality_workspace
+Parse unified sequencing and OD workbooks, reconstruct relative and absolute
+abundance, attach species annotations and export per-condition abundance tables
+and a color map.
 
-功能
-----
-1. 从统一测序 Excel 和 OD Excel 中解析数据
-2. 计算 relative abundance 和 absolute abundance
-3. 加载 species annotation
-4. 输出 processed/{experiment}/W*/abs_abundance.csv
-5. 输出 color_map.csv
+Outputs: processed/{experiment}/W*/abs_abundance.csv and processed/color_map.csv.
 
-颜色映射设计（保留最初版风格 + 轻量分类约束）
------------------------------------------------
-**风格**（完全沿用你最初版）：
-  - HSL 色彩空间
-  - 跳过红色 (0.00-0.06, 0.92-1.00) 和纯绿色 (0.28-0.42)
-  - 6 种 sat/lum 组合循环，中等亮度
-  - interleaving 排列：相邻 species 拿到 hue 距离最远的位置
-  - mortality / temperature 用 hue_start offset 错开 (0.0 / 0.5)
-
-**唯一的分类约束**：
-  - species 在 hue 轴上的位置由"taxon 字典序"改成
-    "phylum → family → genus → taxon 数字号"排序后的位次
-  - 这样同 family/genus 的 species 拿到相邻 hue slot，色相相近
-  - 但 sat/lum 组合循环 + interleaving 仍然让每个 species 清晰可分
-
-**为什么不再做 family 加权 / phylum 分块 / L 梯度**：
-  - 那些约束会把全局 hue 空间切碎，导致 species 多时颜色趋同
-  - 你最初版的"全 species 平铺"之所以颜色丰富，正是因为没有这种切分
-  - 这里只用 annotation 来决定"谁排在谁旁边"，不切空间
+The legacy HSL palette uses broad hue coverage, excludes red and pure green,
+cycles six saturation/lightness combinations, and interleaves distant hue slots.
+Temperature and mortality palettes use independent offsets. Taxonomic ordering
+(phylum, family, genus, numeric taxon ID) keeps related species near one another
+on the virtual hue axis without partitioning the available hue space.
+The current palette implementation uses family/phylum base colors and
+within-genus variants; the legacy hue helpers remain available.
 """
 
 import re
@@ -471,29 +454,29 @@ def attach_annotations(df, annotation_df):
 #  Experiment-specific genus-first academic palette
 # =====================================================================
 #
-# 设计哲学
+# Legacy palette design
 # --------
-# 你最初版本能产出"颜色丰富、相邻 species 对比强"的关键在于：
-#   1. 平铺所有 species 到完整可用 hue 空间
-#   2. interleaving 让相邻位置 hue 距离最大化
-#   3. 6 种 sat/lum 组合循环再强化区分度
+# Broad color coverage and adjacent-species contrast come from:
+# 1. Spreading all species across the available hue space.
+# 2. Interleaving to maximize hue distances between adjacent positions.
+# 3. Cycling six saturation/lightness combinations for additional contrast.
 #
-# 之前我做的 phylum/family hue band 分配，会把整个 hue 空间切碎，
-# 导致单个 family 内的 species 共享狭窄色相区，颜色趋同。
+# Phylum/family hue bands partition the full hue space,
+# giving species within a family similar colors from a narrow range.
 #
-# 这版只做一件事：把 species 在"虚拟 hue 轴"上的排序，
-# 从原来的字典序改成分类层级排序 (phylum → family → genus → number)。
-# 其他一切（色相空间、interleaving、sat/lum 循环）完全沿用原版。
+# The legacy design changes only the order of species on the virtual hue axis,
+# from alphabetical order to phylum, family, genus and numeric taxon order.
+# Hue coverage, interleaving and saturation/lightness cycles retain source values.
 #
-# 结果：
-#   - 同 family/genus 的 species 在 hue 轴上位置接近 → 色相相近
-#   - 但 interleaving 仍然把它们的实际位置打散 → 仍可清晰区分
-#   - 整体颜色丰富度与原版一致
+# Consequences:
+# Related family/genus members occupy nearby virtual hue slots.
+# Interleaving separates their displayed positions to maintain distinguishability.
+# Overall color coverage matches the original palette.
 
-# 可用 hue 区间：跳过红色 + 跳过纯绿色（沿用原版）
+# Available hue ranges exclude red and pure green, as in the source.
 HUE_SEGMENTS = [(0.13, 0.25), (0.46, 0.88)]
 
-# Sat/Lum 6 种组合循环（完全沿用原版数值）
+# Cycle six saturation/lightness combinations using the original values.
 GENUS_VARIANTS = [
     (0.000, 0.68, 0.46),
     (0.012, 0.55, 0.58),
@@ -505,7 +488,7 @@ GENUS_VARIANTS = [
     (0.048, 0.74, 0.48),
 ]
 
-# mortality / temperature 在虚拟 hue 轴上的起始偏移（沿用原版思路）
+# Independent mortality/temperature offsets on the virtual hue axis.
 HUE_OFFSET = {
     "mortality":   0.0,
     "temperature": 0.37,
@@ -574,7 +557,9 @@ def _hue_total_len():
 
 
 def _pos_to_hue(pos):
-    """虚拟位置 → 真实 hue（跳过红/绿禁区）"""
+    """
+    Map a virtual position to an actual hue, skipping excluded red/green ranges.
+    """
     total_len = _hue_total_len()
     pos = pos % total_len
 
@@ -622,7 +607,9 @@ def _shift_hue_inside_segments(h, dh):
 
 
 def _interleave_indices(n):
-    """原版 interleaving: 0, n//2, 1, n//2+1, ..."""
+    """
+    Interleave indices as 0, n//2, 1, n//2+1, and so on.
+    """
     if n <= 1:
         return list(range(n))
 
@@ -644,17 +631,15 @@ def _interleave_indices(n):
 
 def _generate_palette_for_experiment(df_exp, hue_offset):
     """
-    一个实验内的 species 染色。
+    Generate the species palette for one experiment.
 
-    文章图式规则：
-      1. family/phylum 决定一个离散 base color，而不是连续 hue 轴；
-      2. 同 family 内不同 genus 用同一 base 的明显变体；
-      3. 同 genus 内不同 species 用更近的明暗/饱和度变体；
-      4. mortality / temperature 仍然分开生成，保证两个 library 独立映射。
+    Use discrete family/phylum base colors, distinct variants for genera within a
+    family, and closer lightness/saturation variants for species within a genus.
+    Generate temperature and mortality palettes independently.
     """
     df = df_exp.copy()
 
-    # 填默认值，保证排序稳定
+    # Fill defaults to ensure stable sorting.
     for col in ["phylum", "family", "genus", "unified_annotation"]:
         if col not in df.columns:
             df[col] = ""
@@ -667,7 +652,7 @@ def _generate_palette_for_experiment(df_exp, hue_offset):
 
     df["taxon_number"] = df["taxon"].apply(lambda x: natural_taxon_key(x)[1])
 
-    # 关键：按分类层级排序，而不是字典序
+    # Sort by taxonomic hierarchy rather than alphabetical order.
     df = df.sort_values(
         ["phylum", "family", "genus", "taxon_number", "taxon"]
     ).reset_index(drop=True)
@@ -714,8 +699,8 @@ def _generate_palette_for_experiment(df_exp, hue_offset):
 
 def generate_color_palette(mortality_taxa, temperature_taxa, annotation_df=None):
     """
-    mortality / temperature 独立染色，颜色不共享。
-    返回长格式 color_map: taxon, experiment, color, + annotation 字段
+    Generate independent temperature and mortality palettes.
+    Return a long-format table with taxon, experiment, color and annotation fields.
     """
     rows = []
 
@@ -789,7 +774,7 @@ def main():
     annotation_df = load_annotation_map()
 
     for exp in ["mortality", "temperature"]:
-        print(f"\n处理 {exp} (OD背景: {OD_BACKGROUND[exp]})...")
+        print(f"\nProcessing {exp} (OD background: {OD_BACKGROUND[exp]})...")
 
         seq_df = parse_seq_excel(SEQ_FILES[exp], exp)
         od_df  = parse_od_excel(OD_FILES[exp], exp)
@@ -797,7 +782,7 @@ def main():
         df = compute_abundance(seq_df, od_df)
         df = attach_annotations(df, annotation_df)
 
-        print(f"  -> 记录数: {len(df)}, Taxon: {df['taxon'].nunique()}")
+        print(f"  -> Records: {len(df)}, Taxon: {df['taxon'].nunique()}")
 
         for cond in sorted(df["condition"].unique()):
             cond_dir = os.path.join(OUT_DIR, exp, cond)
@@ -811,11 +796,11 @@ def main():
                 .to_csv(out_path, index=False)
             )
 
-        print(f"  -> 已保存至 {OUT_DIR}/{exp}/W1~W5/")
+        print(f"  -> Saved to {OUT_DIR}/{exp}/W1~W5/")
 
         all_dfs.append(df)
 
-    print("\n生成色板（两个 library 独立，genus-first academic palette）...")
+    print("\nGenerating independent library palettes (genus-first publication palette)...")
 
     all_df = pd.concat(all_dfs, ignore_index=True)
 
@@ -827,9 +812,9 @@ def main():
     color_path = os.path.join(OUT_DIR, "color_map.csv")
     color_df.to_csv(color_path, index=False)
 
-    print(f"  -> {len(color_df)} 色 → {color_path}")
+    print(f"  -> {len(color_df)} colors -> {color_path}")
 
-    print("\n完成！")
+    print("\nDone!")
 
 
 if __name__ == "__main__":

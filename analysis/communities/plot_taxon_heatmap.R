@@ -8,17 +8,17 @@ community_workspace <- function() {
 
 # ===========================================================
 # plot_taxon_heatmap.R
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 每个taxon在各工况下的平均abs_abund热图
-# X轴：工况（W1-W5）
-# Y轴：taxon（按总biomass排序）
-# 颜色：该工况下所有群落×replicate的mean abs_abund
-#       只统计rel_abund > 1%的存活记录（低于检测限视为0）
+# Heatmap of mean abs_abund for each taxon across conditions.
+# X-axis: conditions W1-W5.
+# Y-axis: taxa ranked by total biomass.
+# Color: mean abs_abund across all communities and replicates in a condition.
+# Only rel_abund > 1% counts as present; below-detection abundance contributes zero.
 #
-# 时间点：full=D10，early=D6
+# Endpoint: full = D10; early = D6.
 #
-# 输出: figures/taxon_heatmap/
+# Output: figures/taxon_heatmap/
 #   {experiment}_{window}_taxon_heatmap.pdf
 # ===========================================================
 
@@ -33,15 +33,15 @@ PROC_DIR <- file.path(BASE_DIR, "processed")
 FIG_DIR  <- file.path(BASE_DIR, "figures", "taxon_heatmap")
 dir.create(FIG_DIR, showWarnings = FALSE, recursive = TRUE)
 
-# ── 参数 ─────────────────────────────────────────────────────
-REL_THRESHOLD <- 1.0   # rel_abund > 1% 才视为存活
+# Parameters
+REL_THRESHOLD <- 1.0   # Count taxa as present only when rel_abund > 1%.
 
 WINDOWS <- list(
   full  = list(day = 10, reps = c(1, 2, 3)),
   early = list(day = 6,  reps = c(1))
 )
 
-# ── X轴标签 ──────────────────────────────────────────────────
+# X-axis labels
 X_LABELS <- list(
   mortality = c(
     "W1" = expression(10^{-1}),
@@ -59,23 +59,23 @@ X_LABELS <- list(
   )
 )
 
-# ── 图形参数 ─────────────────────────────────────────────────
+# Plot parameters
 FONT_FAMILY <- "Arial"
 FONT_AX     <- 7
-FONT_TAXON  <- 6      # taxon名字号
+FONT_TAXON  <- 6      # Taxon label font size
 BORDER_SIZE <- 0.25
 TICK_SIZE   <- 0.20
 TICK_LEN    <- -1.0
 
-W_PLOT <- 60    # mm，X轴5个工况
-# H_PLOT按taxon数量动态计算
+W_PLOT <- 60    # Plot width in mm for five X-axis conditions
+# Compute height dynamically from the number of taxa.
 
-# 配色：白→深蓝，零值为白色
+# White-to-dark-blue palette; zero abundance is white.
 HEATMAP_LOW  <- "white"
 HEATMAP_HIGH <- "#1A4E8A"
-HEATMAP_NA   <- "grey95"   # 完全缺失的格子
+HEATMAP_NA   <- "grey95"   # Cells with no measurements
 
-# ── 学术主题 ─────────────────────────────────────────────────
+# Publication plot theme
 theme_pub <- function() {
   theme_classic(base_size = FONT_AX, base_family = FONT_FAMILY) +
     theme(
@@ -113,7 +113,7 @@ theme_pub <- function() {
     )
 }
 
-# ── 主循环 ───────────────────────────────────────────────────
+# Main loop
 for (experiment in c("mortality", "temperature")) {
   for (window_name in c("full", "early")) {
     if (experiment == "temperature" && window_name == "early") next
@@ -126,7 +126,7 @@ for (experiment in c("mortality", "temperature")) {
                 experiment, window_name, last_day,
                 paste(use_reps, collapse = "+")))
     
-    # 读取所有工况数据
+    # Read all conditions.
     records <- list()
     
     for (cond in paste0("W", 1:5)) {
@@ -140,8 +140,8 @@ for (experiment in c("mortality", "temperature")) {
       
       if (nrow(df) == 0) next
       
-      # 只保留存活记录（rel_abund > 1%）
-      # 不存活的abs_abund视为0，不纳入均值计算
+      # Retain present records only: rel_abund > 1%.
+      # Absent taxa contribute zero abundance, with no term in the numerator.
       df_alive <- df %>%
         filter(rel_abund > REL_THRESHOLD) %>%
         mutate(condition = cond)
@@ -153,12 +153,12 @@ for (experiment in c("mortality", "temperature")) {
     
     df_all <- bind_rows(records)
     
-    # ── 计算每个taxon × 工况的mean abs_abund ────────────────
-    # 分母：该工况下所有群落×replicate的数量（存活与否都计入分母）
-    # 即：mean = sum(abs_abund_alive) / n_total_samples
-    # 这样不存活的样本贡献0，反映真实平均
+    # Compute mean abs_abund for each taxon and condition.
+    # Denominator: all communities and replicates, including absent observations.
+    # mean = sum(abs_abund_alive) / n_total_samples
+    # Absent observations contribute zero to the true condition mean.
     
-    # 每个工况的总样本数（群落×replicate）
+    # Total sample count per condition: communities x replicates.
     n_samples <- map_int(paste0("W", 1:5), function(cond) {
       csv_path <- file.path(PROC_DIR, experiment, cond,
                             "abs_abundance.csv")
@@ -178,14 +178,14 @@ for (experiment in c("mortality", "temperature")) {
         mean_abs = sum_abs / n_total
       )
     
-    # ── Taxon排序：按总biomass降序 ───────────────────────────
+    # Order taxa by decreasing total biomass.
     taxon_order <- heatmap_df %>%
       group_by(taxon) %>%
       summarise(total = sum(mean_abs), .groups = "drop") %>%
       arrange(desc(total)) %>%
       pull(taxon)
     
-    # ── 补全缺失格子（某工况下某taxon完全未存活）────────────
+    # Fill cells where a taxon was absent throughout a condition.
     all_conds <- paste0("W", 1:5)
     heatmap_full <- expand_grid(
       condition = all_conds,
@@ -200,12 +200,12 @@ for (experiment in c("mortality", "temperature")) {
       )
     
     n_taxa <- length(taxon_order)
-    cat(sprintf("  存活taxon数: %d\n", n_taxa))
+    cat(sprintf("  Present taxa: %d\n", n_taxa))
     
-    # H动态计算：每个taxon 3mm + 上下边距
+    # Dynamic height: 3 mm per taxon plus top/bottom margins.
     H_PLOT <- n_taxa * 3 + 10
     
-    # ── 绘图 ─────────────────────────────────────────────────
+    # Draw the heatmap.
     p <- ggplot(heatmap_full,
                 aes(x    = condition,
                     y    = taxon,
@@ -227,7 +227,7 @@ for (experiment in c("mortality", "temperature")) {
       ) +
       theme_pub()
     
-    # 移除上方重复的sec.axis（热图用不到）
+    # Remove the duplicate upper secondary axis.
     p <- p + guides(fill = guide_colorbar(
       barwidth  = unit(2,  "mm"),
       barheight = unit(15, "mm"),
@@ -250,11 +250,11 @@ for (experiment in c("mortality", "temperature")) {
   }
 }
 
-cat("\n完成！\n")
+cat("\nDone!\n")
 cat("figures/taxon_heatmap/\n")
 cat("  mortality_full_taxon_heatmap.pdf\n")
 cat("  mortality_early_taxon_heatmap.pdf\n")
 cat("  temperature_full_taxon_heatmap.pdf\n")
-cat(sprintf("\n  存活判定: rel_abund > %.1f%%\n", REL_THRESHOLD))
-cat("  颜色: mean abs_abund（不存活样本贡献0）\n")
-cat("  Y轴: taxon按总biomass降序排列\n")
+cat(sprintf("\n  Presence criterion: rel_abund > %.1f%%\n", REL_THRESHOLD))
+cat("  Color: mean abs_abund (absent observations contribute zero)\n")
+cat("  Y-axis: taxa ordered by decreasing total biomass\n")

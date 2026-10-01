@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 # ===========================================================
 # calculate_species_decomposition.py
-# 主目录: /home/hachi/Tem_mortality_workspace
+# Original workspace: /home/hachi/Tem_mortality_workspace
 #
-# 目的
+# Purpose
 # ----
-# 在两个窗口内计算三套互补指标：
+# Calculate three complementary sets of metrics within the analysis windows:
 #
 # A. species correlation / variance decomposition
-#    基于连续绝对丰度 abs_abund，不设 presence 阈值。
-#    collapse day 保留，因为它是真实 total biomass fluctuation。
+# Use continuous absolute abundance without a presence threshold.
+# Retain collapsed days as genuine total-biomass variation.
 #
 #    B(t) = Σ_i X_i(t)
 #
@@ -20,31 +20,31 @@
 #
 #
 # B. within-window turnover analysis
-#    基于 rel_abund >= 1% 定义 presence。
+# Define presence using rel_abund >= 1%.
 #
-#    但为了避免 low-biomass / collapsed day 的测序噪音被相对丰度
-#    放大，presence 判据改为：
+# Prevent sequencing noise on low-biomass/collapsed days from being
+# amplified by relative abundance; use the following presence rule:
 #
 #      I_i(t) = 1 if rel_abund_i(t) >= 1%
 #                    and total_biomass(t) >= MIN_TOTAL_BIOMASS_FOR_PRESENCE
 #               else 0
 #
-#    注意：
-#      - 不删除 collapsed day。
-#      - collapsed day 保留在时间序列中。
-#      - collapsed day 的 presence vector 全部设为 0。
-#      - 因此 collapse / recovery 仍然会贡献 disappearance / appearance。
+# Notes:
+# Do not delete collapsed days.
+# Retain collapsed days in the time series.
+# Set the entire presence vector to zero on collapsed days.
+# Collapse/recovery therefore contributes disappearance/appearance events.
 #
 #
 # C. biomass-based Shannon cumulative diversity
-#    基于绝对 biomass，不使用 rel_abund。
-#    collapse day 保留。
+# Use absolute biomass rather than rel_abund.
+# Retain collapsed days.
 #
-#    每日 Shannon:
+# Daily Shannon diversity:
 #      p_i(t) = X_i(t) / Σ_j X_j(t)
 #      H(t) = -Σ_i p_i(t) log(p_i(t))
 #
-#    累积 Shannon:
+# Accumulated Shannon diversity:
 #      A_i = Σ_t X_i(t)
 #      p_i_cum = A_i / Σ_j A_j
 #      H_cum = -Σ_i p_i_cum log(p_i_cum)
@@ -52,18 +52,18 @@
 #    cumulative_excess_shannon = H_cum - mean_t H(t)
 #
 #
-# 特殊规则
+# Special rules
 # --------
 # temperature W5:
-#   只保留 community 3, 7, 12。
-#   其他 community 整体排除，因为在 50°C 下已 collapse，
-#   rel_abund 主要反映测序噪音。
+# Retain only communities 3, 7 and 12.
+# Exclude the other communities at 50 degrees C because they collapsed
+# and their relative abundances mainly reflect sequencing noise.
 #
-# 但对于 community 3, 7, 12:
-#   所有天都保留，包括中间真实 collapse 的 day。
+# For communities 3, 7 and 12:
+# Retain all days, including genuine intermediate collapse events.
 #
 #
-# 时间窗口
+# Analysis windows
 # --------
 # 1) last3
 #    temperature: day 8-10, R1/R2/R3
@@ -74,12 +74,12 @@
 #    mortality:   day 3-6,  R1 only
 #
 #
-# 输入
+# Inputs
 # ----
 # processed/{experiment}/W*/abs_abundance.csv
 #
 #
-# 输出
+# Outputs
 # ----
 # processed/species_decomposition/
 #   last3/
@@ -101,26 +101,26 @@ BASE_DIR = os.environ.get("COMMUNITY_WORKSPACE", os.path.dirname(os.path.abspath
 PROC_DIR = os.path.join(BASE_DIR, "processed")
 OUT_DIR  = os.path.join(PROC_DIR, "species_decomposition")
 
-# rel_abund 是百分比，因此 1.0 表示 1%
+# rel_abund is a percentage, so 1.0 represents 1%.
 PRESENCE_THRESHOLD_REL = 1.0
 
-# 只用于 presence/absence turnover。
-# 不用于过滤 abs_abund decomposition。
-# 如果某天 total biomass < 该阈值，则该天 presence vector 全部设为 0。
+# Apply only to presence/absence turnover.
+# Do not filter the absolute-abundance decomposition with this threshold.
+# If daily total biomass is below this value, set the presence vector to zero.
 MIN_TOTAL_BIOMASS_FOR_PRESENCE = 0.01
 MIN_TOTAL_BIOMASS_FOR_DIVERSITY = 0.05
 COMMUNITY_CV_FLUCTUATING_THRESHOLD = 0.25
 PHI_MIN_COMMUNITY_CV_FOR_ROBUST = 0.05
 PHI_MIN_SUM_SPECIES_SD = 1e-9
 
-# temperature W5 只分析这些 community
+# Communities analyzed at temperature W5
 VALID_COMMUNITIES_BY_CONDITION = {
     ("temperature", "W5"): {3, 7, 12},
 }
 
 
 # ============================================================
-# 时间窗口定义
+# Analysis window definitions
 # ============================================================
 
 WINDOW_CONFIG = {
@@ -158,7 +158,7 @@ WINDOW_CONFIG = {
 
 
 # ============================================================
-# 工具函数
+# Helper functions
 # ============================================================
 
 def safe_divide(a, b):
@@ -169,10 +169,8 @@ def safe_divide(a, b):
 
 def apply_special_community_filter(df):
     """
-    应用特殊 community-level 规则。
-
-    当前规则：
-      temperature W5 只保留 community 3, 7, 12。
+    Apply community-level exclusions.
+    For temperature W5, retain communities 3, 7 and 12 only.
     """
     if df.empty:
         return df
@@ -192,8 +190,7 @@ def apply_special_community_filter(df):
 
 def load_abs_abundance():
     """
-    读取 processed/{experiment}/W*/abs_abundance.csv
-    并应用 community-level 特殊过滤。
+    Read processed/{experiment}/W*/abs_abundance.csv and apply community filters.
     """
     all_dfs = []
 
@@ -253,21 +250,14 @@ def load_abs_abundance():
 
 def make_abundance_matrix(df_group, expected_days, value_col):
     """
-    将一个 experiment × condition × community × replica 的数据转成:
-        rows    = day
-        columns = taxon
-        values  = value_col
+    Reshape one experiment x condition x community x replicate into day x taxon matrices.
 
-    对 abs_abund:
-      - 用于 variance/covariance decomposition 和 Shannon。
-      - 有数据的 day 中，taxon NA 视为 0。
-      - 整个窗口内总和为 0 的 taxon 会去掉。
-      - 不根据 total biomass 删除 day。
+    Absolute abundance is used for variance/covariance decomposition and Shannon.
+    Treat missing taxa as zero on recorded days, drop taxa whose window sum is zero,
+    and retain days regardless of their total biomass.
 
-    对 rel_abund:
-      - 用于 presence/absence turnover。
-      - 有数据的 day 中，taxon NA 视为 0。
-      - 不主动去掉低丰度 taxon，后续用 1% 阈值判断 presence。
+    Relative abundance is used for presence/absence turnover. Treat missing taxa as
+    zero on recorded days and retain low-abundance taxa for the later 1% presence rule.
     """
     df = df_group[df_group["day"].isin(expected_days)].copy()
 
@@ -285,16 +275,16 @@ def make_abundance_matrix(df_group, expected_days, value_col):
         .reindex(expected_days)
     )
 
-    # 去掉完全没有任何记录的 day。
-    # 注意：这不是 low-biomass filtering。
-    # 如果某天有记录但 total biomass 接近 0，该 day 会保留。
+    # Remove days with no records at all.
+    # This is not low-biomass filtering.
+    # Retain recorded days even when their total biomass is close to zero.
     valid_day_mask = mat.notna().any(axis=1)
     mat = mat.loc[valid_day_mask]
 
     if mat.shape[0] < 2:
         return None
 
-    # 在有效 day 中，缺失 taxon 视为 0
+    # Treat missing taxa as zero on valid days.
     mat = mat.fillna(0.0)
 
     if value_col == "abs_abund":
@@ -346,11 +336,8 @@ def compute_temporal_bc_mean(rel_mat, abs_mat=None,
 
 def compute_decomposition(abs_mat):
     """
-    输入:
-        abs_mat: day × species 的绝对丰度矩阵
-
-    返回:
-        summary dict, pairwise list
+    Calculate variance/covariance decomposition from a day x species abundance matrix.
+    Return a summary dictionary and a list of pairwise results.
     """
     X = abs_mat.to_numpy(dtype=float)
     days = list(abs_mat.index)
@@ -558,30 +545,24 @@ def compute_turnover(rel_mat,
                      threshold_rel=PRESENCE_THRESHOLD_REL,
                      biomass_threshold=MIN_TOTAL_BIOMASS_FOR_PRESENCE):
     """
-    输入:
-        rel_mat: day × species 相对丰度矩阵，单位 percent
-        abs_mat: day × species 绝对丰度矩阵
+    Calculate presence/absence turnover from relative and absolute abundance matrices.
 
-    presence 定义:
-        I_i(t) = 1 if rel_abund_i(t) >= threshold_rel
-                      and total_biomass(t) >= biomass_threshold
-                 else 0
-
-    关键：
-      - 不删除 low biomass / collapse day。
-      - low biomass / collapse day 的 presence vector 设为全 0。
-      - 因此 collapse / recovery 会反映为 disappearance / appearance。
+    rel_mat is a day x species matrix in percent; abs_mat is absolute abundance.
+    Presence requires rel_abund_i(t) >= threshold_rel and
+     total_biomass(t) >= biomass_threshold.
+    Retain low-biomass/collapsed days but set their entire presence vector to zero.
+    Collapse/recovery therefore contributes disappearance/appearance events.
     """
     if rel_mat is None or abs_mat is None:
         return {}
 
-    # 对齐 day 和 species
+    # Align days and species.
     common_days = [d for d in rel_mat.index if d in abs_mat.index]
     if len(common_days) < 2:
         return {}
 
-    # rel_mat 可能有所有 taxon，abs_mat 只保留非零 taxon。
-    # 为 presence 计算，使用 rel_mat 的 columns。
+    # rel_mat can contain all taxa; abs_mat retains only nonzero taxa.
+    # Use rel_mat columns for presence calculations.
     rel_use = rel_mat.loc[common_days].copy()
     abs_use = abs_mat.reindex(index=common_days).fillna(0.0)
 
@@ -596,7 +577,7 @@ def compute_turnover(rel_mat,
 
     presence = (rel_use >= threshold_rel).astype(int)
 
-    # collapse / low-biomass day: presence 全部设为 0
+    # Set presence to zero on collapsed/low-biomass days.
     presence.loc[~biomass_valid_day, :] = 0
 
     n_species_pool = presence.shape[1]
@@ -636,7 +617,7 @@ def compute_turnover(rel_mat,
 
     turnover_events = appearance_events + disappearance_events
 
-    # 保留归一化版本用于检查，但主图可直接用 turnover_events
+    # Retain the normalized version for checking; main plots may use turnover_events.
     denom_cum = (n_days - 1) * cumulative_richness
     if denom_cum > 0:
         turnover_event_rate = turnover_events / denom_cum
@@ -757,23 +738,19 @@ def shannon_from_vector(v):
 
 def compute_biomass_shannon(abs_mat):
     """
-    基于绝对 biomass 计算 Shannon 多样性。
+    Compute Shannon diversity from absolute biomass.
 
     Daily Shannon:
         p_i(t) = X_i(t) / sum_j X_j(t)
         H(t) = -sum_i p_i(t) log(p_i(t))
-
-    Cumulative Shannon:
+    Accumulated Shannon:
         A_i = sum_t X_i(t)
         p_i_cum = A_i / sum_j A_j
         H_cum = -sum_i p_i_cum log(p_i_cum)
+    Accumulated excess: H_cum - mean_t H(t).
 
-    cumulative_excess_shannon:
-        H_cum - mean_t H(t)
-
-    collapse day 保留。
-    若某天 total biomass = 0，则该天 daily Shannon 为 NA，
-    计算 mean_daily_shannon 时自动忽略 NA。
+    Retain collapsed days. If total biomass is zero, daily Shannon is NA and is
+    ignored when calculating mean_daily_shannon.
     """
     empty_result = {
         "mean_daily_shannon": np.nan,
@@ -836,13 +813,13 @@ def compute_biomass_shannon(abs_mat):
 
 
 # ============================================================
-# 主流程
+# Main workflow
 # ============================================================
 
 def main():
     os.makedirs(OUT_DIR, exist_ok=True)
 
-    print("读取 abs_abundance.csv ...")
+    print("Reading abs_abundance.csv ...")
     df_all = load_abs_abundance()
 
     print(f"  -> total rows after filtering: {len(df_all)}")
@@ -906,8 +883,8 @@ def main():
 
                 # --------------------------------------------------
                 # abs_abund matrix
-                # 用于 decomposition 和 biomass-based Shannon。
-                # collapse day 保留。
+                # Use for decomposition and biomass-based Shannon diversity.
+                # Retain collapsed days.
                 # --------------------------------------------------
                 abs_mat = make_abundance_matrix(
                     df_group,
@@ -924,8 +901,8 @@ def main():
 
                 # --------------------------------------------------
                 # rel_abund matrix
-                # 用于 1% presence/absence turnover。
-                # low-biomass day 不删除，而是 presence 全 0。
+                # Use for 1% presence/absence turnover.
+                # Retain low-biomass days but set their presence vectors to zero.
                 # --------------------------------------------------
                 rel_mat = make_abundance_matrix(
                     df_group,
@@ -943,7 +920,7 @@ def main():
                     biomass_threshold=MIN_TOTAL_BIOMASS_FOR_PRESENCE,
                 )
 
-                # 至少有一套方法成功，就输出 community-level row
+                # Export a community-level row if at least one method succeeds.
                 if decomp_summary is None and not turnover_summary:
                     n_group_skipped += 1
                     print(
@@ -1142,9 +1119,9 @@ def main():
         else:
             print(f"  [warn] no pairwise rows for {window_name}")
 
-    print("\n完成！")
-    print(f"输出目录: {OUT_DIR}")
-    print("\ncommunity_decomposition.csv 中包含：")
+    print("\nDone!")
+    print(f"Output directory: {OUT_DIR}")
+    print("\ncommunity_decomposition.csv includes:")
     print("  A. abs_abund-based variance/covariance/synchrony decomposition")
     print("  B. collapse-aware rel_abund >= 1% within-window turnover analysis")
     print("  C. abs_abund biomass-based cumulative Shannon diversity")
@@ -1157,7 +1134,7 @@ def main():
         "  Extra: community_decomposition_phi_robust.csv excludes near-zero "
         f"phi denominators (community_cv < {PHI_MIN_COMMUNITY_CV_FOR_ROBUST})"
     )
-    print("\n特殊规则：")
+    print("\nSpecial rules:")
     print("  temperature W5 only community 3, 7, 12")
     print("  low-biomass days are NOT deleted")
     print("  low-biomass days only get all-zero presence vectors in turnover analysis")

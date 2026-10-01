@@ -153,9 +153,9 @@ def run_community(S: int, M: int,
     Run a serial-dilution community for `n_cycles`.
 
     Returns:
-        N_last3  (S, 3)  鈥?last 3 cycles' end-of-cycle N (ring buffer order)
-        B_last3  (S, 3)  鈥?last 3 cycles' end-of-cycle B
-        p_end    float   鈥?last cycle's end-of-cycle p
+        N_last3  (S, 3)  - last 3 cycles' end-of-cycle N (ring buffer order)
+        B_last3  (S, 3)  - last 3 cycles' end-of-cycle B
+        p_end    float   - last cycle's end-of-cycle p
     """
     if ph_shape is None:
         ph_shape = np.ones(S, dtype=np.float64)
