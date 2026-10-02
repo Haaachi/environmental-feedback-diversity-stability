@@ -185,7 +185,9 @@ PR_sigma = (sum_i sigma_i)^2 / sum_i sigma_i^2
 ```
 
 where `sigma_i` is the temporal standard deviation of species `B_i` over the
-saved final daily endpoints.
+final three passage endpoints, using unthresholded `B_i` and sample standard
+deviation (`ddof=1`). The normalized manuscript readout is `PR = PR_sigma / S`.
+The absolute biomass activity threshold used for diversity is not applied to PR.
 
 ## Non-Main Runs
 

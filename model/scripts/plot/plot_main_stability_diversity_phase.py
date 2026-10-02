@@ -12,6 +12,9 @@ absolute B_i > 1e-3 activity threshold, then plots:
 3. distribution-free effect size: rank-biserial / Cliff's delta
 4. Spearman rho between CV and diversity among non-collapsed communities
 5. standard-deviation participation ratio among oscillating communities
+
+Manuscript PR uses unthresholded B_i from the final three passage endpoints.
+The normalized phase map divides the species participation ratio by S.
 """
 
 from __future__ import annotations
@@ -380,7 +383,9 @@ def compute_maps(
         metrics["shannon_last_absB"][ir] = shannon(b3_active[..., -1], axis=-1).astype(np.float32)
         metrics["shannon_mean_last3_absB"][ir] = sh_daily.mean(axis=-1).astype(np.float32)
         metrics["shannon_cum3_absB"][ir] = shannon(b3_active.sum(axis=-1), axis=-1).astype(np.float32)
-        pr_sigma[ir] = std_participation_ratio(b10_active).astype(np.float32)
+        # Use the manuscript's last-three-passage B readout without the
+        # activity filter used for diversity.
+        pr_sigma[ir] = std_participation_ratio(b3).astype(np.float32)
         one_minus_max_pi_B[ir] = one_minus_max_std_share(b10_active).astype(np.float32)
 
         if (ir + 1) % 10 == 0 or ir == 0:
@@ -487,7 +492,8 @@ def compute_maps_legacy_phase2(
         metrics["shannon_last_absB"][ir] = shannon(b3_active[..., -1], axis=-1).astype(np.float32)
         metrics["shannon_mean_last3_absB"][ir] = sh_daily.mean(axis=-1).astype(np.float32)
         metrics["shannon_cum3_absB"][ir] = shannon(b3_cum_active, axis=-1).astype(np.float32)
-        pr_sigma[ir] = std_participation_ratio(b3_active).astype(np.float32)
+        # Match the manuscript PR definition and the reorganized-data path.
+        pr_sigma[ir] = std_participation_ratio(b3).astype(np.float32)
         one_minus_max_pi_B[ir] = one_minus_max_std_share(b3_active).astype(np.float32)
 
         if (ir + 1) % 10 == 0 or ir == 0:

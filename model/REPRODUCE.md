@@ -83,7 +83,13 @@ python scripts/plot/plot_main_stability_diversity_phase.py \
 ```
 
 The plotting script recomputes B-based labels and writes individual phase-map
-panels plus a compressed metric file:
+panels plus a compressed metric file. The manuscript PR uses unthresholded B
+over the final three passages, with sample standard deviations and division by
+the total species-pool size S. Both the reorganized and legacy phase2 input
+formats use this convention. Last-ten PR diagnostics are optional analyses.
+
+After updating from an earlier repository version, rerun this plotting command
+from the raw model outputs to replace the previous PR maps and metric file:
 
 ```text
 figures/main_stability_diversity/rh_gnormal_sd3_R1_sparse6_tri_S12_h015_g100_e5000_cv010_oscmin010/

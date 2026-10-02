@@ -54,3 +54,24 @@ Generated validation outputs and the local virtual environment are excluded by
 
 The language update preserves calculations and numerical thresholds, including
 the existing 0.25/0.265 discrepancy described in `DATA.md`.
+
+## Manuscript PR reconciliation (2026-10-02)
+
+The manuscript phase-map plotting script now calculates PR from unthresholded
+species B over the final three passages, using sample standard deviations and
+division by S for the normalized map. Both reorganized and legacy phase2 input
+formats follow this definition. Optional last-ten postprocessing diagnostics
+remain separate from the manuscript PR.
+
+Three regression tests passed (`python -m unittest discover -s model/tests -v`):
+changing the preceding seven passages leaves manuscript PR unchanged; species
+variation below the diversity activity threshold contributes to PR with matching
+results across both storage formats; and zero temporal variation has undefined
+participation rather than an invented finite value. Synthetic-input comparisons
+also confirmed that non-PR phase-map outputs are unchanged by this correction.
+
+The full production ensemble and manuscript PR figures have not been regenerated
+locally. Rerun the main phase-map command in `model/REPRODUCE.md` from the raw
+ensemble files to update the figure and NPZ outputs. The experimental CV display
+threshold discrepancy and isolate death-kinetics timing discrepancy identified
+during manuscript review are not resolved by this PR correction.

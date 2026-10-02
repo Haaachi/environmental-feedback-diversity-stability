@@ -8,7 +8,12 @@ metrics_last3.py            retained last-3 helper
 metrics_turnover_last10.py  retained last-10 turnover helper
 ```
 
-The main phase-map analysis uses B-based endpoints. Stability, collapse,
-community CV, and last-day diversity are computed from the final three passage
-endpoints. Cumulative diversity, synchrony, participation ratio, and turnover
-diagnostics use the final ten endpoints.
+The manuscript phase-map script uses B-based endpoints. Stability, collapse,
+community CV, and primary fluctuation participation are computed from the final
+three passage endpoints; endpoint diversity uses the final passage.
+The manuscript PR is calculated from unthresholded B, with sample standard
+deviations, and normalized by the total species-pool size S.
+
+The separate last-ten postprocessing output contains optional cumulative
+diversity, synchrony, participation and turnover diagnostics. Its participation
+ratio is not the final-three-passage PR reported in the manuscript.
